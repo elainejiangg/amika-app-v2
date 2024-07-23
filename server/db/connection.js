@@ -1,7 +1,7 @@
 // Connects to mongodb server
 import { MongoClient, ServerApiVersion } from "mongodb";
 
-//some reason uri not working for .env
+//some reason uri not working for .env !
 const URI =
   "mongodb+srv://amika:rokpQxuSC9oa4DIU@amika-test.vht9oy6.mongodb.net/?retryWrites=true&w=majority&appName=amika-test";
 // console.log("URI: ", URI);
