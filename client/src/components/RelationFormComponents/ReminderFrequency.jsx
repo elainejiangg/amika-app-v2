@@ -1,10 +1,12 @@
-import React, { useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import { RRule } from "rrule";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomRecurrence from "./Modals/CustomRecurrence";
 
 export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
+  const [errors, setErrors] = useState({});
+
   const handleAddReminder = () => {
     const freqItem = {
       startDate: new Date(),
@@ -36,10 +38,36 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
     setReminderPairs(newReminders);
   };
 
+  const validateDates = (index) => {
+    const reminder = reminderPairs[index];
+    const { startDate, endDate } = reminder.frequency;
+    const newErrors = { ...errors };
+
+    if (startDate > endDate) {
+      newErrors[index] = "Start date cannot be after end date.";
+      handleReminderChange(index, "frequency", {
+        ...reminder.frequency,
+        startDate: endDate,
+      });
+    } else if (endDate < startDate) {
+      newErrors[index] = "End date cannot be before start date.";
+      handleReminderChange(index, "frequency", {
+        ...reminder.frequency,
+        endDate: startDate,
+      });
+    } else {
+      delete newErrors[index];
+    }
+
+    setErrors(newErrors);
+  };
+
   const generateOccurrences = (index) => {
     const reminder = reminderPairs[index];
     const freqItem = reminder.frequency; // Directly access the object
     if (!freqItem) return; // Ensure freqItem is defined
+
+    // logic if frequency is Custom
     if (freqItem.frequency === "Custom") {
       // Custom frequency logic
       const customOccurrences = [];
@@ -55,21 +83,28 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
         occurrences: customOccurrences,
       });
     } else {
+      const freqStartDate = new Date(freqItem.startDate);
+      const freqTime = new Date(freqItem.time);
+      const freqEndDate = new Date(freqItem.endDate);
+
+      console.log("SD: ", freqStartDate);
+      console.log("FT: ", freqTime);
+      console.log("FE: ", freqEndDate);
       const ruleOptions = {
         freq: freqItem.frequency,
         dtstart: new Date(
-          freqItem.startDate.getFullYear(),
-          freqItem.startDate.getMonth(),
-          freqItem.startDate.getDate(),
-          freqItem.time.getHours(),
-          freqItem.time.getMinutes()
+          freqStartDate.getFullYear(),
+          freqStartDate.getMonth(),
+          freqStartDate.getDate(),
+          freqTime.getHours(),
+          freqTime.getMinutes()
         ),
         until: new Date(
-          freqItem.endDate.getFullYear(),
-          freqItem.endDate.getMonth(),
-          freqItem.endDate.getDate(),
-          freqItem.time.getHours(),
-          freqItem.time.getMinutes()
+          freqEndDate.getFullYear(),
+          freqEndDate.getMonth(),
+          freqEndDate.getDate(),
+          freqTime.getHours(),
+          freqTime.getMinutes()
         ),
         byweekday:
           freqItem.frequency === RRule.WEEKLY
@@ -87,11 +122,11 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
   };
 
   useEffect(() => {
-    reminderPairs.forEach((reminder, index) => {
-      if (reminder.frequency && !reminder.frequency.error) {
-        generateOccurrences(index);
-      }
-    });
+    //   reminderPairs.forEach((reminder, index) => {
+    //     if (reminder.frequency && !reminder.frequency.error) {
+    //       generateOccurrences(index);
+    //     }
+    //   });
   }, [reminderPairs]);
 
   return (
@@ -108,9 +143,7 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
             <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
               Frequency
             </th>
-            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Actions
-            </th>
+            <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
           </tr>
         </thead>
         <tbody className="bg-white divide-y divide-gray-200">
@@ -138,12 +171,13 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
                   <label>Start Date:</label>
                   <DatePicker
                     selected={reminder.frequency?.startDate}
-                    onChange={(date) =>
+                    onChange={(date) => {
                       handleReminderChange(index, "frequency", {
                         ...reminder.frequency,
                         startDate: date,
-                      })
-                    }
+                      });
+                      validateDates(index);
+                    }}
                     showYearDropdown
                     showMonthDropdown
                     dateFormat="P"
@@ -153,17 +187,21 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
                   <label>End Date:</label>
                   <DatePicker
                     selected={reminder.frequency?.endDate}
-                    onChange={(date) =>
+                    onChange={(date) => {
                       handleReminderChange(index, "frequency", {
                         ...reminder.frequency,
                         endDate: date,
-                      })
-                    }
+                      });
+                      validateDates(index);
+                    }}
                     showYearDropdown
                     showMonthDropdown
                     dateFormat="P"
                   />
                 </div>
+                {errors[index] && (
+                  <div className="text-red-500 text-sm">{errors[index]}</div>
+                )}
                 <div>
                   <label>Frequency:</label>
                   <select
@@ -243,8 +281,10 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
                 )}
                 <div>
                   <label>Time:</label>
+                  {console.log("TIME: ", reminder.frequency?.time)}
+                  {console.log("TIME: ", typeof reminder.frequency?.time)}
                   <DatePicker
-                    selected={reminder.frequency?.time}
+                    selected={new Date(reminder.frequency?.time)}
                     onChange={(date) =>
                       handleReminderChange(index, "frequency", {
                         ...reminder.frequency,
@@ -264,18 +304,24 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
                     {(reminder.showAll
                       ? reminder.frequency?.occurrences
                       : reminder.frequency?.occurrences?.slice(0, 3)
-                    )?.map((date, dateIndex) => (
-                      <li key={dateIndex}>
-                        {date.toLocaleDateString()}{" "}
-                        {date.toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                          hour12: true,
-                        })}
-                      </li>
-                    ))}
+                    )?.map((date, dateIndex) => {
+                      const dateObject = new Date(date);
+                      return (
+                        <li key={dateIndex}>
+                          {dateObject.toLocaleDateString([], {
+                            weekday: "short",
+                          })}{" "}
+                          {dateObject.toLocaleDateString()}{" "}
+                          {dateObject.toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                            hour12: true,
+                          })}{" "}
+                        </li>
+                      );
+                    })}
                   </ul>
-                  {reminder.frequency?.occurrences?.length > 5 && (
+                  {/* {reminder.frequency?.occurrences?.length > 5 && (
                     <button
                       className="text-blue-500"
                       type="button"
@@ -289,9 +335,10 @@ export default function ReminderFrequency({ reminderPairs, setReminderPairs }) {
                     >
                       {reminder.showAll ? "Show Less" : "Show All"}
                     </button>
-                  )}
+                  )} */}
                 </div>
               </td>
+
               <td className="px-6 py-4 whitespace-nowrap">
                 <button
                   className="text-red-500"
