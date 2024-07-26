@@ -185,7 +185,11 @@ export default function ContactHistory({ history = [], setHistory }) {
   };
 
   const handleCustomDateSubmit = (customDate) => {
-    handleDateChange(currentIndex, customDate);
+    const formattedDate =
+      typeof customDate === "string"
+        ? customDate.charAt(0).toUpperCase() + customDate.slice(1)
+        : customDate;
+    handleDateChange(currentIndex, formattedDate);
   };
 
   return (
@@ -207,7 +211,7 @@ export default function ContactHistory({ history = [], setHistory }) {
               Topic
             </th>
             <th className="px-6 py-3 bg-gray-50 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-              Method
+              Method of Contact
             </th>
             <th className="px-6 py-3 bg-gray-50"></th>
           </tr>
@@ -283,7 +287,7 @@ export default function ContactHistory({ history = [], setHistory }) {
         className="mt-4 text-sm font-semibold leading-6 text-blue-600"
         onClick={addHistoryItem}
       >
-        Add Contact Instance
+        + Add Contact Instance
       </button>
 
       <DateSelector

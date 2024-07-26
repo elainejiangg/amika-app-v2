@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 
-export default function CustomRecurrenceModal({
+export default function CustomRecurrence({
   isOpen,
   onClose,
   onSubmit,
@@ -40,10 +40,11 @@ export default function CustomRecurrenceModal({
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="bg-white p-4 rounded shadow-lg">
         <h2 className="text-lg font-semibold mb-4">Custom Recurrence</h2>
-        <div className="flex items-center mb-4">
+        <div className="flex items-center mb-4 ">
+          <p className="pr-2"> Every </p>
           <input
             type="number"
-            className="border border-gray-300 p-2 mr-2"
+            className="border border-gray-300 p-2 mr-2 w-1/6 h-1/4"
             value={num}
             onChange={handleNumChange}
             min="1"

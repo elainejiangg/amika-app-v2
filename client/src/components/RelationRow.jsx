@@ -9,31 +9,26 @@ const RelationRow = (props) => {
   return (
     <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
       <td className="p-4 align-middle ">{props.relation.name}</td>
-
       <td className="p-4 align-middle ">{props.relation.pronouns}</td>
       <td className="p-4 align-middle ">{props.relation.relationship_type}</td>
       <td className="p-4 align-middle ">{props.relation.overview}</td>
       <td className="p-4 align-middle ">
-        {props.relation.contact_frequency.map((contact, index) => (
-          <div key={index}>
-            Method: {contact.method}
-            <ul>
-              {contact.frequency.map((freq, idx) => (
-                <li key={idx}>
-                  {freq.number} {freq.unit}
-                </li>
-              ))}
-            </ul>
-          </div>
-        ))}
+        <ul className="list-disc pl-0">
+          {props.relation.contact_frequency.map((contact, index) => (
+            <li key={index}>
+              {contact.method} - {contact.frequency}
+            </li>
+          ))}
+        </ul>
       </td>
       <td>
-        {props.relation.contact_history.map((history, index) => (
-          <div key={index}>
-            Topic: {history.topic}, Method: {history.method}, Date:{" "}
-            {history.date}
-          </div>
-        ))}
+        <ul className="list-disc pl-0">
+          {props.relation.contact_history.map((interaction, index) => (
+            <li key={index}>
+              {interaction.topic} - {interaction.method} - {interaction.date}
+            </li>
+          ))}
+        </ul>
       </td>
       <td className="p-4 align-middle ">
         {props.relation.reminder_enabled ? "Yes" : "No"}
@@ -43,14 +38,14 @@ const RelationRow = (props) => {
           {props.relation.reminder_frequency.map((reminder, index) => (
             <div key={index}>
               Method: {reminder.method}
-              <div>
+              {/* <div>
                 {reminder.frequency.map((freq, index) => (
                   <li key={index}>
                     {freq.number} {freq.unit} starting from{" "}
                     {new Date(freq.start_time).toLocaleString()}
                   </li>
                 ))}
-              </div>
+              </div> */}
             </div>
           ))}
         </ul>

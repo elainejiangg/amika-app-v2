@@ -8,6 +8,8 @@ import RelationshipType from "./RelationFormComponents/RelationshipType";
 import ContactHistory from "./RelationFormComponents/ContactHistory";
 // import ContactFrequency from "./RelationFormComponents/ContactFrequency";
 import ReminderEnabled from "./RelationFormComponents/ReminderEnabled";
+import ContactFrequency from "./RelationFormComponents/ContactFrequency";
+import ReminderFrequency from "./RelationFormComponents/ReminderFrequency";
 // component to help display each record in the recordlist
 export default function RelationForm() {
   const [form, setForm] = useState({
@@ -120,7 +122,7 @@ export default function RelationForm() {
             </h2>
           </div>
 
-          <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8 ">
+          <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8">
             <Name form={form} updateForm={updateForm} />
             <Pronouns form={form} updateForm={updateForm} />
             <RelationshipType form={form} updateForm={updateForm} />
@@ -130,6 +132,25 @@ export default function RelationForm() {
               history={form.contact_history}
               setHistory={(newHistory) =>
                 updateForm({ contact_history: newHistory })
+              }
+            />
+            <ContactFrequency
+              contactFrequencyPairs={form.contact_frequency}
+              setContactFrequencyPairs={(pairs) =>
+                setForm((prevForm) => ({
+                  ...prevForm,
+                  contact_frequency: pairs,
+                }))
+              }
+            />
+
+            <ReminderFrequency
+              reminderPairs={form.reminder_frequency}
+              setReminderPairs={(pairs) =>
+                setForm((prevForm) => ({
+                  ...prevForm,
+                  reminder_frequency: pairs,
+                }))
               }
             />
           </div>

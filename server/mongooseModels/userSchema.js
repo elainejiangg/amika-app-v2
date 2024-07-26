@@ -2,12 +2,7 @@ import mongoose from "mongoose";
 
 const contactFrequencySchema = new mongoose.Schema({
   method: { type: String, required: false },
-  frequency: [
-    {
-      number: { type: Number, required: true }, // weekly = [1, week] -> need to convert to string when feeding into GPT or tell GPT how to decipher
-      unit: { type: String, required: true },
-    },
-  ],
+  frequency: { type: String, required: false },
 });
 
 const interactionSchema = new mongoose.Schema(
@@ -26,16 +21,31 @@ const interactionSchema = new mongoose.Schema(
   }
 );
 
+// const frequencySchema = new mongoose.Schema({
+//   startDate: { type: Date, required: true },
+//   endDate: { type: Date, required: true },
+//   frequency: { type: String, required: true },
+//   weekdays: { type: [Boolean], required: true },
+//   time: { type: Date, required: true },
+//   occurrences: { type: [Date], required: true },
+// });
+
+const frequencySchema = new mongoose.Schema({
+  startDate: { type: Date, required: true },
+  endDate: { type: Date, required: true },
+  frequency: { type: String, required: true },
+  weekdays: { type: [Boolean], required: true },
+  time: { type: Date, required: true },
+  occurrences: { type: [Date], required: true },
+  customRecurrence: { num: Number, unit: String },
+  customRecurrenceText: String,
+  error: String,
+});
+
 // email_body (ai-generated when sent, in code)
 const reminderFrequencySchema = new mongoose.Schema({
   method: { type: String, required: true },
-  frequency: [
-    {
-      number: { type: Number, required: true }, // weekly = [1, week] -> need to convert to string when feeding into GPT or tell GPT how to decipher
-      unit: { type: String, required: true },
-      start_time: { type: Date, required: true }, // Would be precalcuated based on current date and time, but user can adjust. Should auto-recalauate after day has passed
-    },
-  ],
+  frequency: { type: frequencySchema, required: true },
 });
 //maybe store in another field, next reminder times and dates
 
@@ -59,16 +69,16 @@ const userSchema = new mongoose.Schema({
 });
 
 const User = mongoose.model("User", userSchema);
-const Relation = mongoose.model("Relation", relationSchema);
-const Interaction = mongoose.model("Interaction", interactionSchema);
-const ReminderFrequency = mongoose.model(
-  "ReminderFrequency",
-  reminderFrequencySchema
-);
-const ContactFrequency = mongoose.model(
-  "ContactFrequency",
-  contactFrequencySchema
-);
+// const Relation = mongoose.model("Relation", relationSchema);
+// const Interaction = mongoose.model("Interaction", interactionSchema);
+// const ReminderFrequency = mongoose.model(
+//   "ReminderFrequency",
+//   reminderFrequencySchema
+// );
+// const ContactFrequency = mongoose.model(
+//   "ContactFrequency",
+//   contactFrequencySchema
+// );
 // const Chat = mongoose.model("Chat", chatSchema);
 
 export { User };
