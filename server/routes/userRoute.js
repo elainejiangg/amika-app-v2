@@ -93,6 +93,7 @@ router.post("/users/:googleId/relations", async (req, res) => {
       contact_history: req.body.contact_history,
       reminder_frequency: req.body.reminder_frequency,
       reminder_enabled: req.body.reminder_enabled,
+      reminder_occurences: req.body.reminder_occurences
     };
 
     user.relations.push(newRelation);

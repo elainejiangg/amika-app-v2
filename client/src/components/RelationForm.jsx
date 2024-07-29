@@ -11,6 +11,7 @@ import ReminderEnabled from "./RelationFormComponents/ReminderEnabled";
 import ContactFrequency from "./RelationFormComponents/ContactFrequency";
 import ReminderFrequency from "./RelationFormComponents/ReminderFrequency";
 // component to help display each record in the recordlist
+
 export default function RelationForm() {
   const [form, setForm] = useState({
     name: "",
@@ -21,6 +22,7 @@ export default function RelationForm() {
     contact_history: [],
     reminder_frequency: [],
     reminder_enabled: false,
+    reminder_occurences: [],
   });
   const [isNew, setIsNew] = useState(true); // identifies if creating new record
   const params = useParams();
@@ -152,6 +154,7 @@ export default function RelationForm() {
                   reminder_frequency: pairs,
                 }))
               }
+              reminderOccurrences={form.reminder_occurences}
             />
           </div>
         </div>

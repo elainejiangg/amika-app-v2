@@ -37,7 +37,7 @@ const RelationRow = (props) => {
         <ul>
           {props.relation.reminder_frequency.map((reminder, index) => (
             <div key={index}>
-              Method: {reminder.method}
+              {reminder.method} - {reminder.frequency.frequency}
               {/* <div>
                 {reminder.frequency.map((freq, index) => (
                   <li key={index}>

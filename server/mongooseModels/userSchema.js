@@ -36,7 +36,6 @@ const frequencySchema = new mongoose.Schema({
   frequency: { type: String, required: true },
   weekdays: { type: [Boolean], required: true },
   time: { type: Date, required: true },
-  occurrences: { type: [Date], required: true },
   customRecurrence: { num: Number, unit: String },
   customRecurrenceText: String,
   error: String,
@@ -46,6 +45,7 @@ const frequencySchema = new mongoose.Schema({
 const reminderFrequencySchema = new mongoose.Schema({
   method: { type: String, required: true },
   frequency: { type: frequencySchema, required: true },
+  occurrences: { type: [Date], required: true },
 });
 //maybe store in another field, next reminder times and dates
 
