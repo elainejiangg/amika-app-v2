@@ -22,7 +22,6 @@ export default function RelationForm() {
     contact_history: [],
     reminder_frequency: [],
     reminder_enabled: false,
-    reminder_occurences: [],
   });
   const [isNew, setIsNew] = useState(true); // identifies if creating new record
   const params = useParams();
@@ -147,14 +146,13 @@ export default function RelationForm() {
             />
 
             <ReminderFrequency
-              reminderPairs={form.reminder_frequency}
-              setReminderPairs={(pairs) =>
+              reminderTriples={form.reminder_frequency}
+              setReminderTriples={(triples) =>
                 setForm((prevForm) => ({
                   ...prevForm,
-                  reminder_frequency: pairs,
+                  reminder_frequency: triples,
                 }))
               }
-              reminderOccurrences={form.reminder_occurences}
             />
           </div>
         </div>

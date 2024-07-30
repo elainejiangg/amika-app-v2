@@ -93,7 +93,7 @@ router.post("/users/:googleId/relations", async (req, res) => {
       contact_history: req.body.contact_history,
       reminder_frequency: req.body.reminder_frequency,
       reminder_enabled: req.body.reminder_enabled,
-      reminder_occurences: req.body.reminder_occurences
+      reminder_occurences: req.body.reminder_occurences,
     };
 
     user.relations.push(newRelation);
@@ -139,6 +139,22 @@ router.delete("/users/:googleId/relations/:id", async (req, res) => {
     res.status(204).send();
   } catch (err) {
     res.status(500).send("ERROR DELETING RELATION");
+  }
+});
+
+//GET all reminder enabled relations of user
+router.get("/users/:googleId/occurrences", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    const relations = user.relations.filter(
+      (relation) => relation.reminder_enabled
+    );
+    // const occurrences = relations.map(
+    //   (relation) => relation.reminder_frequency
+    // );
+    res.status(200).send(relations);
+  } catch (err) {
+    res.status(500).send("ERROR GETTING OCCURRENCES");
   }
 });
 
