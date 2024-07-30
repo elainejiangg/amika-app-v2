@@ -2,12 +2,16 @@ import express from "express"; // express is web framework for node.js (just mak
 import cors from "cors"; // (cross-origin resource sharing) enables secure requests and data transfers from outside origins
 import connectDB from "./mongoConfig/connection.js";
 import userRoutes from "./routes/userRoute.js";
+import { fetchAndScheduleReminders } from "./reminderUtils.js";
 
 const PORT = process.env.PORT || 5050;
 const app = express();
 
 // Connect to MongoDB
-connectDB();
+connectDB().then(() => {
+  // Fetch and schedule reminders after connecting to the database
+  fetchAndScheduleReminders();
+});
 
 // Middleware
 app.use(express.json());

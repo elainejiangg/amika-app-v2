@@ -1,6 +1,7 @@
 import express from "express";
 import { User } from "../mongooseModels/userSchema.js"; // import schemas ( & subschemas)
-
+import { sendEmail } from "../emailService.js";
+import { fetchAndScheduleReminders } from "../reminderUtils.js";
 const router = express.Router();
 
 ///////////////////// ENDPOINTS /////////////////////
@@ -47,6 +48,23 @@ router.patch("/users/:id", async (req, res) => {
     res.status(204).send();
   } catch (err) {
     res.status(500).send("ERROR UPDATING USER");
+  }
+});
+
+// GET USER INFO [ /users/:googleId/info ]
+router.get("/users/:googleId/info", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    const userInfo = {
+      name: user.name,
+      email: user.email,
+    };
+
+    res.status(200).send(userInfo);
+  } catch (err) {
+    res.status(500).send("ERROR GETTING USER INFO");
   }
 });
 
@@ -143,7 +161,7 @@ router.delete("/users/:googleId/relations/:id", async (req, res) => {
 });
 
 //GET all reminder enabled relations of user
-router.get("/users/:googleId/occurrences", async (req, res) => {
+router.get("/users/:googleId/reminders", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
     const relations = user.relations.filter(
@@ -155,6 +173,47 @@ router.get("/users/:googleId/occurrences", async (req, res) => {
     res.status(200).send(relations);
   } catch (err) {
     res.status(500).send("ERROR GETTING OCCURRENCES");
+  }
+});
+
+// router.post("/send-test-email", async (req, res) => {
+//   try {
+//     const { to, subject, text } = req.body;
+//     await sendEmail(to, subject, text);
+//     res.status(200).send("Email sent successfully");
+//   } catch (err) {
+//     res.status(500).send("ERROR SENDING EMAIL");
+//   }
+// });
+
+// // GET ALL RELATIONS of a user [ /<googleId>/relations ]
+// router.get("/users/:googleId/relations", async (req, res) => {
+//   try {
+//     let user = await User.findOne({ googleId: req.params.googleId });
+//     if (!user) return res.status(404).send("USER NOT FOUND");
+
+//     let relations = user.relations;
+//     res.status(200).send(relations);
+//   } catch (err) {
+//     res.status(500).send("ERROR GETTING RELATIONS!");
+//   }
+// });
+
+// LOGIN USER [ /login ]
+router.post("/login", async (req, res) => {
+  try {
+    const { googleId } = req.body;
+    const user = await User.findOne({ googleId });
+    if (!user) {
+      return res.status(404).send("USER NOT FOUND");
+    }
+    console.log(googleId);
+    // Fetch and schedule reminders after login
+    await fetchAndScheduleReminders(googleId);
+    console.log("Successfully  fetch and schedule!");
+    res.status(200).send("User logged in and reminders scheduled");
+  } catch (err) {
+    res.status(500).send("ERROR LOGGING IN USER");
   }
 });
 

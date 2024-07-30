@@ -1,0 +1,13 @@
+{
+  "type": "service_account",
+  "project_id": "amika-426103",
+  "private_key_id": "6464e4e5be58fdc32a41dfba3f992e3866c7dd0b",
+  "private_key": "-----BEGIN PRIVATE KEY-----\nMIIEvgIBADANBgkqhkiG9w0BAQEFAASCBKgwggSkAgEAAoIBAQCyXOhSpa9yvuek\nLYuFU0RpnZERmz+KuKP0EyyBteaePsjfIzUUV6JxUoWLolLxpgtFs8JGO2Hs8PDN\nCmeyAAZKVx+5B/BY4ZllW4o/gN6fXCAMWelV093FhyQKBvHPGSJHGRvp8VEAnCv5\nTkYkanY/Kta8RmcCri+U5EzAzwNOqIktxTt1oWqq6NzJwilEcq13I9EK9sHkYAvG\n26lTPd8BmhDBUahmrEANkvKwHudPHLJMRdNtJvgEGx7gXgIrlJf5B4HSDFG3GTvY\nP6RisARb7K5ds0IMEkj5Of74pTlZHek+fIYzWXr7Wf7eovErlytGhUaKQ1ViyqYM\nmsmCtzFbAgMBAAECggEAUB5gs2M+dMYhKkPVJL37AJApLmX0vHzlFMmaF+fcIGAm\nfekEOk+FJe9CEq+HH4oNDTHKhh69hZ/TIt9WJgRRzwnks4pH4bzw2TEt4AmktqO8\nt5+ZqxaAy25Bd4mYDAWHurUiL0tZLfN440NQSaJS3FwDWk4rjm4s7G5CtecnXqif\nwdZNMSQhOor6a2Vj81xUREHwR8HiUUvaIL4/65P2Vh1JgiVsj0c1QKwAhiGSRnqI\n1RR363Vn7Prll4nypoK9nNltr9zD/n+UUWdHP8z1Ec4Ny0y37wQ3tY9EgZWS6xRs\n7yV6QePlyjrGxaMER/uGsV55DSVIgeWb1Iwrcc5OoQKBgQDvegvudVbkcJ81cdFW\nOIKRdmWkksHR3OBPRE/jeVmm4A0PWYDgDNheQdyZvRdKleFbIK7xjdo2Flzzq9Kb\n4K77p5m1q0qORiUvuM/oydNtguEhjXFwGLM0/mjxqHD8JAl+uYIZYB90ucxMRIu8\neliziv26NcufEJO8yOmrKTBRewKBgQC+q2NbZeS7upnklAK6BXzCSNck6226EGk2\n0denT9wAj/WvBPEI3qvWEw/BMU9ydclajnCLqyNIUs929R6EurDFplvkUvJOaUYm\nFui6nAMgizs79nwrPFxarTVg1zBBmhT32iPNTPzv6QxlOY2DN9XMy1eGUMlI2mct\nSK71KBHpoQKBgQCUkw/b/gjO6eCc8+SArca0INSm6jY90d+IzkUSSDOLCO6RW2JN\nnyqOMCaBa4OLzrlmJDzluLBtZip9M1kTRK7LiwweXgt/gZ2Iogy7zJvUEaNDgdGj\nTm/ArSbG505R4LnTWZyRycU6UhuiJdTcNrvZiJ4qbT3LjilasvvmKUPFCQKBgQCS\novi8t/ZbsjzcoEAglEvIl4Busmkm6awhLu0tjati+1Q1kBVXfvikoPBC4gt5ucBr\nVpSTtcBixN0tXYJlDbcZqsGNLYWQbEI41PGTYpy9EJcznHMORVO5oPAmVBiWu0tY\n+nkCUS1NzOtthf+hZPWWlOPxNnw2/VDQcM+tV22/QQKBgH/ftar0qPsHttDf8JDS\n6cL1QuUvbsJGxROP3baB8RIqZc4tR2wLn1DL38NVi092R5apMu0cEGgoPqzbewg6\nh1XMuff+rlfn0Td/yhZs59Ut/O+HcCdss8R0AigrDEKqa/IES8yhoa8NXeDrmZ2N\nKMJnyrM4Kr9WifWRs8zqNcFm\n-----END PRIVATE KEY-----\n",
+  "client_email": "amikatesting@amika-426103.iam.gserviceaccount.com",
+  "client_id": "104527711014444881135",
+  "auth_uri": "https://accounts.google.com/o/oauth2/auth",
+  "token_uri": "https://oauth2.googleapis.com/token",
+  "auth_provider_x509_cert_url": "https://www.googleapis.com/oauth2/v1/certs",
+  "client_x509_cert_url": "https://www.googleapis.com/robot/v1/metadata/x509/amikatesting%40amika-426103.iam.gserviceaccount.com",
+  "universe_domain": "googleapis.com"
+}
