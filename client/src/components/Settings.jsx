@@ -272,51 +272,6 @@ const Settings = () => {
     setChangedRelations((prev) => ({ ...prev, [relationIndex]: true }));
   };
 
-  // const handleConfirmChanges = async (relationIndex) => {
-  //   const hasErrors = Object.keys(errors).some((key) =>
-  //     key.startsWith(`${relationIndex}-`)
-  //   );
-  //   if (hasErrors) {
-  //     console.error("Cannot save changes due to validation errors");
-  //     // Optionally, show an error message to the user
-  //     return;
-  //   }
-
-  //   try {
-  //     const updatedRelation = { ...relations[relationIndex] };
-
-  //     // Generate occurrences for each reminder
-  //     updatedRelation.reminder_frequency =
-  //       updatedRelation.reminder_frequency.map((reminder) => ({
-  //         ...reminder,
-  //         occurrences: generateOccurrences(reminder),
-  //       }));
-
-  //     console.log("Updated relation:", updatedRelation);
-
-  //     saveReminderChanges(updatedRelation);
-  //     console.log("Changes saved successfully:");
-
-  //     // Update the local state with the new occurrences
-  //     setRelations((prevRelations) => {
-  //       const newRelations = [...prevRelations];
-  //       newRelations[relationIndex] = updatedRelation;
-  //       return newRelations;
-  //     });
-
-  //     setChangedRelations((prev) => {
-  //       const newChangedRelations = { ...prev };
-  //       delete newChangedRelations[relationIndex];
-  //       return newChangedRelations;
-  //     });
-
-  //     // Optionally, show a success message to the user
-  //   } catch (error) {
-  //     console.error("Error saving changes:", error);
-  //     // Show an error message to the user
-  //   }
-  // };
-
   const handleConfirmChanges = async (relationIndex) => {
     const hasErrors = Object.keys(errors).some((key) =>
       key.startsWith(`${relationIndex}-`)
@@ -456,31 +411,6 @@ const Settings = () => {
       return rule.all();
     }
   };
-
-  // const handleAddReminder = () => {
-  //   const freqItem = {
-  //     startDate: new Date(),
-  //     endDate: new Date(),
-  //     frequency: RRule.DAILY,
-  //     weekdays: [false, false, false, false, false, false, false],
-  //     time: new Date(),
-  //     customRecurrence: { num: 1, unit: "day" },
-  //     customRecurrenceText: "",
-  //     error: "",
-  //   };
-  //   setReminderTriples([
-  //     ...reminderTriples,
-  //     {
-  //       method: "",
-  //       frequency: freqItem,
-  //       occurrences: [],
-  //     },
-  //   ]);
-  // };
-
-  // const handleDeleteReminder = (index) => {
-  //   setReminderTriples(reminderTriples.filter((_, i) => i !== index));
-  // };
 
   const handleAddReminder = (relationIndex) => {
     const newRelations = [...relations];
