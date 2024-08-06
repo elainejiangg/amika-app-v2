@@ -332,35 +332,6 @@ const Settings = () => {
       }
       return customOccurrences;
     } else {
-      // const freqStartDate = new Date(freqItem.startDate);
-      // const freqTime = new Date(freqItem.time);
-      // const freqEndDate = new Date(freqItem.endDate);
-
-      // const ruleOptions = {
-      //   freq: parseInt(freqItem.frequency, 10),
-      //   dtstart: new Date(
-      //     freqStartDate.getFullYear(),
-      //     freqStartDate.getMonth(),
-      //     freqStartDate.getDate(),
-      //     freqTime.getHours(),
-      //     freqTime.getMinutes()
-      //   ),
-      //   until: new Date(
-      //     freqEndDate.getFullYear(),
-      //     freqEndDate.getMonth(),
-      //     freqEndDate.getDate(),
-      //     freqTime.getHours(),
-      //     freqTime.getMinutes()
-      //   ),
-      //   byweekday:
-      //     parseInt(freqItem.frequency, 10) === RRule.WEEKLY.toString()
-      //       ? freqItem.weekdays
-      //           .map((val, i) => val && RRule.weekdays[i])
-      //           .filter(Boolean)
-      //       : null,
-      // };
-      // const rule = new RRule(ruleOptions);
-      // return rule.all();
       const freqStartDate = new Date(freqItem.startDate);
       const freqTime = new Date(freqItem.time);
       const freqEndDate = new Date(freqItem.endDate);
