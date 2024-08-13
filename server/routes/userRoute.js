@@ -1,8 +1,13 @@
 import express from "express";
 import { User } from "../mongooseModels/userSchema.js"; // import schemas ( & subschemas)
-import { sendEmail } from "../emailService.js";
-import { fetchAndScheduleReminders } from "../reminderUtils.js";
+import { sendEmail } from "../nudgeSys/emailService.js";
+import { fetchAndScheduleReminders } from "../nudgeSys/reminderUtils.js";
+import { OpenAI } from "openai";
+
 const router = express.Router();
+const openai = new OpenAI({
+  apiKey: "sk-proj-475iAtQOgswTukttWClwT3BlbkFJVps9XItTpGqmOLOflz5E",
+});
 
 ///////////////////// ENDPOINTS /////////////////////
 
@@ -51,6 +56,37 @@ router.patch("/users/:id", async (req, res) => {
   }
 });
 
+// UPDATE USER EMAIL [ /users/:googleId/email ]
+router.patch("/users/:googleId/email", async (req, res) => {
+  try {
+    const { googleId } = req.params;
+    const { email } = req.body;
+
+    if (!email) {
+      return res.status(400).json({ error: "Email is required" });
+    }
+
+    const user = await User.findOne({ googleId });
+
+    if (!user) {
+      return res.status(404).json({ error: "USER NOT FOUND" });
+    }
+
+    user.email = email;
+    await user.save();
+
+    res
+      .status(200)
+      .json({ message: "Email updated successfully", email: user.email });
+  } catch (err) {
+    console.error("Error updating user email:", err);
+    res.status(500).json({
+      error: "ERROR UPDATING USER EMAIL",
+      details: err.message,
+    });
+  }
+});
+
 // GET USER INFO [ /users/:googleId/info ]
 router.get("/users/:googleId/info", async (req, res) => {
   try {
@@ -60,11 +96,70 @@ router.get("/users/:googleId/info", async (req, res) => {
     const userInfo = {
       name: user.name,
       email: user.email,
+      assistant_id: user.assistant_id,
     };
 
     res.status(200).send(userInfo);
   } catch (err) {
     res.status(500).send("ERROR GETTING USER INFO");
+  }
+});
+
+// GET USER ASSISTANT ID [ /users/:googleId/assistant_id ]
+router.get("/users/:googleId/assistant_id", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    const assistantId = user.assistant_id;
+    res.status(200).send(assistantId);
+  } catch (err) {
+    res.status(500).send("ERROR GETTING USER ASSISTANT ID");
+  }
+});
+
+// UPDATE USER ASSISTANT ID [ /users/:googleId/assistant_id ]
+router.patch("/users/:googleId/:assistant_id", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    user.assistant_id = req.params.assistant_id;
+    await user.save();
+    res.status(200).send();
+  } catch (err) {
+    res.status(500).send("ERROR UPDATING USER ASSISTANT ID");
+  }
+});
+
+// GENERATE NEW USER THREAD ID & UPDATE USER THREAD IDS [ /users/:googleId/thread_id ]
+router.post("/users/:googleId/thread_id", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    // Create a new thread using OpenAI API
+    const thread = await openai.beta.threads.create();
+    const newThreadId = thread.id;
+
+    user.thread_ids.push(newThreadId);
+    await user.save();
+    res.status(200).send();
+  } catch (err) {
+    res.status(500).send("ERROR UPDATING USER THREAD ID");
+  }
+});
+
+// GET USER MOST RECENT THREAD ID [ /users/:googleId/thread_id ]
+router.get("/users/:googleId/thread_id", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    const threadId = user.thread_ids[user.thread_ids.length - 1];
+    res.status(200).send(threadId);
+  } catch (err) {
+    res.status(500).send("ERROR UPDATING USER THREAD ID");
   }
 });
 
@@ -123,7 +218,7 @@ router.post("/users/:googleId/relations", async (req, res) => {
   }
 });
 
-// UPDATE SINGLE RELATION of a user [ /users/:googleId/relations/:id ]
+//UPDATE SINGLE RELATION of a user [ /users/:googleId/relations/:id ]
 router.patch("/users/:googleId/relations/:id", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
@@ -132,7 +227,6 @@ router.patch("/users/:googleId/relations/:id", async (req, res) => {
     const relation = user.relations.id(req.params.id);
     if (!relation) return res.status(404).send("RELATION NOT FOUND");
 
-    // Update the relation with the new data
     Object.assign(relation, req.body);
 
     await user.save();
@@ -146,17 +240,30 @@ router.patch("/users/:googleId/relations/:id", async (req, res) => {
 router.delete("/users/:googleId/relations/:id", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
-    if (!user) return res.status(404).send("USER NOT FOUND");
+    if (!user) {
+      console.log("USER NOT FOUND");
+      return res.status(404).json({ error: "USER NOT FOUND" });
+    }
+    const relationIndex = user.relations.findIndex(
+      (relation) => relation._id.toString() === req.params.id
+    );
+    if (relationIndex === -1) {
+      console.log("RELATION NOT FOUND");
+      return res.status(404).json({ error: "RELATION NOT FOUND" });
+    }
+    user.relations.splice(relationIndex, 1);
 
-    const relation = user.relations.id(req.params.id);
-    if (!relation) return res.status(404).send("RELATION NOT FOUND");
-
-    relation.remove();
     await user.save();
 
-    res.status(204).send();
+    console.log("Relation deleted successfully");
+    res.status(200).json({ message: "Relation deleted successfully" });
   } catch (err) {
-    res.status(500).send("ERROR DELETING RELATION");
+    console.error("Error deleting relation:", err);
+    res.status(500).json({
+      error: "ERROR DELETING RELATION",
+      details: err.message,
+      stack: err.stack,
+    });
   }
 });
 

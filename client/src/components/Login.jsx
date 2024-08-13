@@ -40,23 +40,26 @@ function Login() {
               email: data.email,
               picture: data.picture,
             }),
-          }).then(() => {
-            // Call the login endpoint to fetch and schedule reminders
-            fetch("http://localhost:5050/login", {
-              method: "POST",
-              headers: {
-                "Content-Type": "application/json",
-              },
-              body: JSON.stringify({ googleId: data.id }),
+          })
+            .then(() => {
+              // Call the login endpoint to fetch and schedule reminders
+              fetch("http://localhost:5050/login", {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+                body: JSON.stringify({ googleId: data.id }),
+              });
+            })
+            .then(() => {
+              // Generate a new thread ID and store it in the database
+              fetch(`http://localhost:5050/users/${data.id}/thread_id`, {
+                method: "POST",
+                headers: {
+                  "Content-Type": "application/json",
+                },
+              });
             });
-            // .then((response) => {
-            //   if (response.ok) {
-            //     navigate("/relations");
-            //   } else {
-            //     console.error("Failed to log in and schedule reminders");
-            //   }
-            // });
-          });
         })
         .catch((err) =>
           console.log(`ERROR GETTING PROFILE FROM GOOGLE API ${err}`)

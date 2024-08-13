@@ -1,36 +1,21 @@
-import React, { useEffect, useState, useRef } from "react";
+import React, { useEffect, useState } from "react";
 import DatePicker from "react-datepicker";
 import { RRule } from "rrule";
 import "react-datepicker/dist/react-datepicker.css";
 import CustomRecurrence from "./Modals/CustomRecurrence";
 import isEqual from "lodash.isequal";
+import cloneDeep from "lodash.clonedeep";
+
+// RRule.DAILY    // 3
+// RRule.WEEKLY   // 2
+// RRule.MONTHLY  // 1
+// RRule.YEARLY   // 0
 
 export default function ReminderFrequency({
   reminderTriples,
   setReminderTriples,
 }) {
   const [errors, setErrors] = useState({});
-  // const prevReminderTriplesRef = useRef([]);
-
-  const [hasFrequencyChanged, setHasFrequencyChanged] = useState(false);
-
-  const deepCopyWithTypes = (reminders) => {
-    return reminders.map((reminder) => ({
-      ...reminder,
-      frequency: {
-        ...reminder.frequency,
-        startDate: new Date(reminder.frequency.startDate),
-        endDate: new Date(reminder.frequency.endDate),
-        time: new Date(reminder.frequency.time),
-      },
-      method: reminder.method,
-      occurrences: (reminder.occurrences || []).map((occ) => new Date(occ)),
-    }));
-  };
-
-  const [prevReminderTriples, setPrevReminderTriples] = useState(
-    deepCopyWithTypes(reminderTriples)
-  );
 
   const handleAddReminder = () => {
     const freqItem = {
@@ -87,10 +72,7 @@ export default function ReminderFrequency({
     setErrors(newErrors);
   };
 
-  // const generateOccurrences = (index) => {
-  //   console.log("*****GENERATE OCCURRENCES");
-  // };
-
+  ///
   const generateOccurrences = (index) => {
     console.log("*****GENERATE OCCURRENCES");
     const reminder = reminderTriples[index];
@@ -143,40 +125,6 @@ export default function ReminderFrequency({
       handleReminderChange(index, "occurrences", rule.all());
     }
   };
-
-  useEffect(() => {
-    console.log("*****USE EFFECT for FREQ");
-    let frequencyChanged = false;
-    if (prevReminderTriples.length !== reminderTriples.length) {
-      frequencyChanged = true;
-    }
-
-    if (prevReminderTriples.length > 0) {
-      reminderTriples.forEach((reminder, index) => {
-        const prevReminder = prevReminderTriples[index];
-        if (
-          prevReminder &&
-          !isEqual(prevReminder.frequency, reminder.frequency)
-        ) {
-          frequencyChanged = true;
-        }
-      });
-    }
-
-    setHasFrequencyChanged(frequencyChanged);
-  }, [reminderTriples]);
-
-  useEffect(() => {
-    console.log("*****USE EFFECT for GENERATE OCCURRENCES");
-    if (hasFrequencyChanged) {
-      reminderTriples.forEach((reminder, index) => {
-        generateOccurrences(index);
-      });
-      // setHasFrequencyChanged(false); // Reset the flag
-      setPrevReminderTriples(deepCopyWithTypes(reminderTriples)); // Deep copy
-    }
-  }, [hasFrequencyChanged]);
-
   return (
     <div>
       <label className="block text-sm font-medium leading-6 text-slate-900">
@@ -301,7 +249,7 @@ export default function ReminderFrequency({
                     </select>
                   </div>
                 )}
-                {reminder.frequency?.frequency === RRule.WEEKLY && (
+                {reminder.frequency?.frequency === RRule.WEEKLY.toString() && (
                   <div>
                     <label>Repeat on:</label>
                     {["S", "M", "T", "W", "T", "F", "S"].map(
@@ -344,7 +292,7 @@ export default function ReminderFrequency({
                     dateFormat="h:mm aa"
                   />
                 </div>
-                <div>
+                {/* <div>
                   <h3>Occurrences:</h3>
                   <ul>
                     {(reminder.showAll
@@ -382,7 +330,7 @@ export default function ReminderFrequency({
                       {reminder.showAll ? "Show Less" : "Show All"}
                     </button>
                   )}
-                </div>
+                </div> */}
               </td>
               <td className="px-6 py-4 whitespace-nowrap">
                 <button

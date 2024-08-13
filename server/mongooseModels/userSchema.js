@@ -65,56 +65,11 @@ const userSchema = new mongoose.Schema({
   name: String,
   email: String,
   picture: String,
+  assistant_id: String,
+  thread_ids: { type: [String] },
   relations: { type: [relationSchema], required: false },
 });
 
 const User = mongoose.model("User", userSchema);
-// const Relation = mongoose.model("Relation", relationSchema);
-// const Interaction = mongoose.model("Interaction", interactionSchema);
-// const ReminderFrequency = mongoose.model(
-//   "ReminderFrequency",
-//   reminderFrequencySchema
-// );
-// const ContactFrequency = mongoose.model(
-//   "ContactFrequency",
-//   contactFrequencySchema
-// );
-// const Chat = mongoose.model("Chat", chatSchema);
 
 export { User };
-
-// import mongoose from "mongoose";
-
-// // const conversationSchema = new mongoose.Schema({
-// //   date_created: { type: Date, required: true },
-// //   content: { type: String, required: true },
-// // });
-
-// // const profileSchema = new mongoose.Schema({
-// //   profileId: { type: String, required: true },
-// //   profileName: { type: String, required: true },
-// //   profileReminderEnabled: { type: Boolean, required: false },
-// //   profileReminderFrequency: { type: String, required: false },
-// //   profileRelationshipType: { type: String, required: false },
-// //   profileConversationHistory: { type: Map, of: profileSchema, default: {} },
-// //   profileInterests: { type: String, required: false },
-// // });
-
-// const profileSchema = new mongoose.Schema({
-//   profileId: { type: String, required: true },
-//   profileName: { type: String, required: true },
-//   profilePosition: { type: String, required: true },
-//   profileLevel: { type: String, required: true },
-// });
-
-// const userSchema = new mongoose.Schema({
-//   googleId: { type: String, required: true, unique: true },
-//   name: String,
-//   email: String,
-//   picture: String,
-//   profiles: { type: Map, of: profileSchema, default: {} },
-// });
-
-// const User = mongoose.model("User", userSchema);
-
-// export default User;

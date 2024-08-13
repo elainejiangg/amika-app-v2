@@ -8,47 +8,11 @@ import Login from "./components/Login";
 import "./index.css";
 import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "./AuthContext";
+import Settings from "./components/Settings";
+import Chat from "./components/Chat";
 
 const clientId =
   "182357756258-759f39bnehg84lammns3g3rcvnqjte2u.apps.googleusercontent.com";
-
-// App is displayed on every load, outlet in App.jsx changes out what is loaded below as a child depending on the path
-// const router = createBrowserRouter([
-//   {
-//     path: "/",
-//     element: <Login />,
-//   },
-//   {
-//     path: "/relations",
-//     element: <App />,
-//     children: [
-//       {
-//         path: "/relations",
-//         element: <RelationList />,
-//       },
-//     ],
-//   },
-//   {
-//     path: "/users/relations",
-//     element: <App />,
-//     children: [
-//       {
-//         path: "/users/relations",
-//         element: <RelationForm />,
-//       },
-//     ],
-//   },
-//   {
-//     path: "edit/:id",
-//     element: <App />,
-//     children: [
-//       {
-//         path: "edit/:id",
-//         element: <RelationForm />,
-//       },
-//     ],
-//   },
-// ]);
 
 // App is displayed on every load, outlet in App.jsx changes out what is loaded below as a child depending on the path
 const router = createBrowserRouter([
@@ -83,6 +47,26 @@ const router = createBrowserRouter([
       {
         path: "/users/:googleId/relations/edit/:id",
         element: <RelationForm />,
+      },
+    ],
+  },
+  {
+    path: "/settings",
+    element: <App />,
+    children: [
+      {
+        path: "/settings",
+        element: <Settings />,
+      },
+    ],
+  },
+  {
+    path: "/chat",
+    element: <App />,
+    children: [
+      {
+        path: "/chat",
+        element: <Chat />,
       },
     ],
   },

@@ -10,8 +10,14 @@ import ContactHistory from "./RelationFormComponents/ContactHistory";
 import ReminderEnabled from "./RelationFormComponents/ReminderEnabled";
 import ContactFrequency from "./RelationFormComponents/ContactFrequency";
 import ReminderFrequency from "./RelationFormComponents/ReminderFrequency";
-// component to help display each record in the recordlist
+import { RRule } from "rrule";
 
+// RRule.DAILY    // 3
+// RRule.WEEKLY   // 2
+// RRule.MONTHLY  // 1
+// RRule.YEARLY   // 0
+
+// component to help display each record in the recordlist
 export default function RelationForm() {
   const [form, setForm] = useState({
     name: "",
@@ -59,9 +65,63 @@ export default function RelationForm() {
     });
   }
 
+  const generateOccurrences = (reminder) => {
+    const freqItem = reminder.frequency;
+    if (!freqItem) return [];
+
+    if (freqItem.frequency === "Custom") {
+      const customOccurrences = [];
+      let currentDate = new Date(freqItem.startDate);
+      while (currentDate <= freqItem.endDate) {
+        customOccurrences.push(new Date(currentDate));
+        currentDate.setDate(
+          currentDate.getDate() + freqItem.customRecurrence.num
+        );
+      }
+      return customOccurrences;
+    } else {
+      const freqStartDate = new Date(freqItem.startDate);
+      const freqTime = new Date(freqItem.time);
+      const freqEndDate = new Date(freqItem.endDate);
+
+      const ruleOptions = {
+        freq: parseInt(freqItem.frequency, 10),
+        dtstart: new Date(
+          freqStartDate.getFullYear(),
+          freqStartDate.getMonth(),
+          freqStartDate.getDate(),
+          freqTime.getHours(),
+          freqTime.getMinutes()
+        ),
+        until: new Date(
+          freqEndDate.getFullYear(),
+          freqEndDate.getMonth(),
+          freqEndDate.getDate(),
+          freqTime.getHours(),
+          freqTime.getMinutes()
+        ),
+        byweekday:
+          parseInt(freqItem.frequency, 10) === RRule.WEEKLY.toString()
+            ? freqItem.weekdays
+                .map((val, i) => val && RRule.weekdays[i])
+                .filter(Boolean)
+            : null,
+      };
+      const rule = new RRule(ruleOptions);
+      return rule.all();
+    }
+  };
+
   async function onSubmit(e) {
     e.preventDefault();
     const relation = { ...form };
+    // Generate occurrences for each reminder
+    relation.reminder_frequency = relation.reminder_frequency.map(
+      (reminder) => ({
+        ...reminder,
+        occurrences: generateOccurrences(reminder),
+      })
+    );
     try {
       let response;
       if (isNew) {
