@@ -411,9 +411,9 @@ const Settings = () => {
   };
 
   return (
-    <div className="flex flex-col h-[calc(100vh-4rem)] p-4 pb-6 w-3/4 max-w-screen-lg">
-      <h3 className="text-lg font-semibold mb-4">Settings</h3>
-      <div className="mb-4 ">
+    <div className="flex flex-col h-full pl-3 w-full lg:w-3/4 max-w-screen-lg ">
+      <div className="mb-4 bg-gradient-to-t from-indigo-100 from-10% via-blue-50 to-sky-50 p-5 rounded-xl">
+        <h1 className="font-bold mb-2 text-lg">Account Info</h1>
         <label
           htmlFor="email"
           className="block text-sm font-medium text-gray-700"
@@ -425,7 +425,7 @@ const Settings = () => {
           id="email"
           value={email}
           onChange={handleEmailChange}
-          className="mt-1 p-2 border border-gray-300 rounded w-1/3 min-w-96 mb-4"
+          className="mt-1 p-2  rounded w-1/3 min-w-64 mb-4"
         />
         {email !== originalEmail && (
           <button
@@ -437,183 +437,132 @@ const Settings = () => {
         )}
       </div>
 
-      <label
-        htmlFor="Reminder"
-        className="block text-sm font-medium text-gray-700"
-      >
-        Reminders
-      </label>
-      <input
-        type="text"
-        placeholder="Search relations..."
-        value={searchTerm}
-        onChange={(e) => setSearchTerm(e.target.value)}
-        className="mb-4 p-2 border border-gray-300 rounded w-1/2 min-w-96 mb-4"
-      />
-      <div style={{ overflowY: "scroll", maxHeight: "400px" }}>
-        <table className="min-w-full bg-white text-left ">
-          <thead>
-            <tr>
-              <th className="py-2">Name</th>
-              <th className="py-2 text-center">Enabled</th>
-              <th className="pl-6 py-2 ">Reminders</th>
-            </tr>
-          </thead>
-          <tbody className="bg-white divide-y divide-gray-200">
-            {filteredRelations.map((relation, relationIndex) => (
-              <tr key={relation._id}>
-                <td className="py-2">{relation.name}</td>
-                <td className="py-2 text-center">
-                  <input
-                    type="checkbox"
-                    checked={relation.reminder_enabled}
-                    onChange={() => handleCheckboxChange(relationIndex)}
-                  />
-                </td>
-                <td>
-                  {relation.reminder_frequency ? (
-                    <table>
-                      {relation.reminder_frequency.length > 0 && (
-                        <thead>
-                          <tr>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Method
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
-                              Frequency
-                            </th>
-                            <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
-                          </tr>
-                        </thead>
-                      )}
-                      <tbody>
-                        {relation.reminder_frequency.map(
-                          (reminder, reminderIndex) => (
-                            <tr key={reminderIndex}>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <select
-                                  name="reminderMethod"
-                                  id="reminderMethod"
-                                  className="block w-full border border-gray-300 bg-white py-1 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
-                                  value={reminder.method}
-                                  onChange={(e) =>
-                                    handleMethodChange(
-                                      relationIndex,
-                                      reminderIndex,
-                                      e.target.value
-                                    )
-                                  }
-                                >
-                                  <option value="">Select Method</option>
-                                  <option value="Call">Call</option>
-                                  <option value="Text">Text</option>
-                                  <option value="In-Person">In-Person</option>
-                                  <option value="Other">Other</option>
-                                </select>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                <div>
-                                  <label>Start Date:</label>
-                                  <DatePicker
-                                    selected={
-                                      new Date(reminder.frequency?.startDate)
-                                    }
-                                    onChange={(date) =>
-                                      handleReminderChange(
-                                        relationIndex,
-                                        reminderIndex,
-                                        "frequency",
-                                        { startDate: date.toISOString() }
-                                      )
-                                    }
-                                    showYearDropdown
-                                    showMonthDropdown
-                                    dateFormat="P"
-                                  />
-                                </div>
-                                <div>
-                                  <label>End Date:</label>
-                                  <DatePicker
-                                    selected={
-                                      new Date(reminder.frequency?.endDate)
-                                    }
-                                    onChange={(date) =>
-                                      handleReminderChange(
-                                        relationIndex,
-                                        reminderIndex,
-                                        "frequency",
-                                        { endDate: date.toISOString() }
-                                      )
-                                    }
-                                    showYearDropdown
-                                    showMonthDropdown
-                                    dateFormat="P"
-                                  />
-                                </div>
-                                {errors[
-                                  `${relationIndex}-${reminderIndex}`
-                                ] && (
-                                  <div className="text-red-500 text-sm">
-                                    {
-                                      errors[
-                                        `${relationIndex}-${reminderIndex}`
-                                      ]
-                                    }
-                                  </div>
-                                )}
-                                <div>
-                                  <label>Frequency:</label>
+      <div className="bg-gradient-to-t from-indigo-100 from-10% via-blue-50 to-sky-50 p-5 rounded-xl">
+        <h1 className="font-bold mb-2 text-lg">Reminder Notifications</h1>
+
+        <input
+          type="text"
+          placeholder="Search relations... (Type a name)"
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="mt-1  mb-4 p-2 rounded w-1/2 min-w-64 mb-4"
+        />
+        <div className="overflow-y-scroll max-h-[600px] bg-white px-6 rounded-lg">
+          <table className="min-w-full text-left ">
+            <thead className=" border-b border-slate-300 sticky top-0 z-10 pt-2 bg-white">
+              <tr>
+                <th className="py-2">Name</th>
+                <th className="py-2 text-center">Enabled</th>
+                <th className="pl-6 py-2 ">Reminders</th>
+              </tr>
+            </thead>
+            <tr className="h-px bg-gray-200"></tr>
+            <tbody className="bg-white divide-y divide-slate-300 ">
+              {filteredRelations.map((relation, relationIndex) => (
+                <tr key={relation._id}>
+                  <td className="py-2">{relation.name}</td>
+                  <td className="py-2 text-center">
+                    <input
+                      type="checkbox"
+                      checked={relation.reminder_enabled}
+                      onChange={() => handleCheckboxChange(relationIndex)}
+                    />
+                  </td>
+                  <td>
+                    {relation.reminder_frequency ? (
+                      <table>
+                        {relation.reminder_frequency.length > 0 && (
+                          <thead>
+                            <tr>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Method
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
+                                Frequency
+                              </th>
+                              <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider"></th>
+                            </tr>
+                          </thead>
+                        )}
+                        <tbody>
+                          {relation.reminder_frequency.map(
+                            (reminder, reminderIndex) => (
+                              <tr key={reminderIndex}>
+                                <td className="px-6 py-4 whitespace-nowrap">
                                   <select
-                                    value={reminder.frequency?.frequency}
+                                    name="reminderMethod"
+                                    id="reminderMethod"
+                                    className="block w-full border border-gray-300 bg-white py-1 px-3 shadow-sm focus:border-indigo-500 focus:outline-none focus:ring-indigo-500 sm:text-sm"
+                                    value={reminder.method}
                                     onChange={(e) =>
-                                      handleReminderChange(
+                                      handleMethodChange(
                                         relationIndex,
                                         reminderIndex,
-                                        "frequency",
-                                        {
-                                          ...reminder.frequency,
-                                          frequency: e.target.value,
-                                        }
+                                        e.target.value
                                       )
                                     }
                                   >
-                                    <option value={RRule.DAILY}>Daily</option>
-                                    <option value={RRule.WEEKLY}>Weekly</option>
-                                    <option value={RRule.MONTHLY}>
-                                      Monthly
-                                    </option>
-                                    <option value="Custom">Custom</option>
+                                    <option value="">Select Method</option>
+                                    <option value="Call">Call</option>
+                                    <option value="Text">Text</option>
+                                    <option value="In-Person">In-Person</option>
+                                    <option value="Other">Other</option>
                                   </select>
-                                </div>
-                                {reminder.frequency?.frequency === "Custom" && (
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
                                   <div>
-                                    <label>Custom Recurrence:</label>
-                                    <input
-                                      type="number"
-                                      value={
-                                        reminder.frequency?.customRecurrence.num
+                                    <label>Start Date:</label>
+                                    <DatePicker
+                                      selected={
+                                        new Date(reminder.frequency?.startDate)
                                       }
-                                      onChange={(e) =>
+                                      onChange={(date) =>
                                         handleReminderChange(
                                           relationIndex,
                                           reminderIndex,
                                           "frequency",
-                                          {
-                                            ...reminder.frequency,
-                                            customRecurrence: {
-                                              ...reminder.frequency
-                                                .customRecurrence,
-                                              num: e.target.value,
-                                            },
-                                          }
+                                          { startDate: date.toISOString() }
                                         )
                                       }
+                                      showYearDropdown
+                                      showMonthDropdown
+                                      dateFormat="P"
                                     />
-                                    <select
-                                      value={
-                                        reminder.frequency?.customRecurrence
-                                          .unit
+                                  </div>
+                                  <div>
+                                    <label>End Date:</label>
+                                    <DatePicker
+                                      selected={
+                                        new Date(reminder.frequency?.endDate)
                                       }
+                                      onChange={(date) =>
+                                        handleReminderChange(
+                                          relationIndex,
+                                          reminderIndex,
+                                          "frequency",
+                                          { endDate: date.toISOString() }
+                                        )
+                                      }
+                                      showYearDropdown
+                                      showMonthDropdown
+                                      dateFormat="P"
+                                    />
+                                  </div>
+                                  {errors[
+                                    `${relationIndex}-${reminderIndex}`
+                                  ] && (
+                                    <div className="text-red-500 text-sm">
+                                      {
+                                        errors[
+                                          `${relationIndex}-${reminderIndex}`
+                                        ]
+                                      }
+                                    </div>
+                                  )}
+                                  <div>
+                                    <label>Frequency:</label>
+                                    <select
+                                      value={reminder.frequency?.frequency}
                                       onChange={(e) =>
                                         handleReminderChange(
                                           relationIndex,
@@ -621,85 +570,139 @@ const Settings = () => {
                                           "frequency",
                                           {
                                             ...reminder.frequency,
-                                            customRecurrence: {
-                                              ...reminder.frequency
-                                                .customRecurrence,
-                                              unit: e.target.value,
-                                            },
+                                            frequency: e.target.value,
                                           }
                                         )
                                       }
                                     >
-                                      <option value="day">Day(s)</option>
-                                      <option value="week">Week(s)</option>
-                                      <option value="month">Month(s)</option>
+                                      <option value={RRule.DAILY}>Daily</option>
+                                      <option value={RRule.WEEKLY}>
+                                        Weekly
+                                      </option>
+                                      <option value={RRule.MONTHLY}>
+                                        Monthly
+                                      </option>
+                                      <option value="Custom">Custom</option>
                                     </select>
                                   </div>
-                                )}
-                                {reminder.frequency?.frequency ===
-                                  RRule.WEEKLY.toString() && (
-                                  <div>
-                                    <label>Repeat on:</label>
-                                    {["S", "M", "T", "W", "T", "F", "S"].map(
-                                      (day, dayIndex) => (
-                                        <label key={dayIndex}>
-                                          <input
-                                            type="checkbox"
-                                            checked={
-                                              reminder.frequency?.weekdays[
-                                                dayIndex
-                                              ]
-                                            }
-                                            onChange={() => {
-                                              const newWeekdays = [
-                                                ...reminder.frequency.weekdays,
-                                              ];
-                                              newWeekdays[dayIndex] =
-                                                !newWeekdays[dayIndex];
-                                              handleReminderChange(
-                                                relationIndex,
-                                                reminderIndex,
-                                                "frequency",
-                                                {
-                                                  ...reminder.frequency,
-                                                  weekdays: newWeekdays,
-                                                }
-                                              );
-                                            }}
-                                          />
-                                          {day}
-                                        </label>
-                                      )
-                                    )}
-                                  </div>
-                                )}
-                                <div>
-                                  <label>Time:</label>
-                                  <DatePicker
-                                    selected={
-                                      new Date(reminder.frequency?.time)
-                                    }
-                                    onChange={(date) =>
-                                      handleReminderChange(
-                                        relationIndex,
-                                        reminderIndex,
-                                        "frequency",
-                                        {
-                                          ...reminder.frequency,
-                                          time: date,
+                                  {reminder.frequency?.frequency ===
+                                    "Custom" && (
+                                    <div>
+                                      <label>Custom Recurrence:</label>
+                                      <input
+                                        type="number"
+                                        value={
+                                          reminder.frequency?.customRecurrence
+                                            .num
                                         }
-                                      )
-                                    }
-                                    showTimeSelect
-                                    showTimeSelectOnly
-                                    timeIntervals={15}
-                                    timeCaption="Time"
-                                    dateFormat="h:mm aa"
-                                  />
-                                </div>
-                              </td>
-                              <td className="px-6 py-4 whitespace-nowrap">
-                                {/* <div>
+                                        onChange={(e) =>
+                                          handleReminderChange(
+                                            relationIndex,
+                                            reminderIndex,
+                                            "frequency",
+                                            {
+                                              ...reminder.frequency,
+                                              customRecurrence: {
+                                                ...reminder.frequency
+                                                  .customRecurrence,
+                                                num: e.target.value,
+                                              },
+                                            }
+                                          )
+                                        }
+                                      />
+                                      <select
+                                        value={
+                                          reminder.frequency?.customRecurrence
+                                            .unit
+                                        }
+                                        onChange={(e) =>
+                                          handleReminderChange(
+                                            relationIndex,
+                                            reminderIndex,
+                                            "frequency",
+                                            {
+                                              ...reminder.frequency,
+                                              customRecurrence: {
+                                                ...reminder.frequency
+                                                  .customRecurrence,
+                                                unit: e.target.value,
+                                              },
+                                            }
+                                          )
+                                        }
+                                      >
+                                        <option value="day">Day(s)</option>
+                                        <option value="week">Week(s)</option>
+                                        <option value="month">Month(s)</option>
+                                      </select>
+                                    </div>
+                                  )}
+                                  {reminder.frequency?.frequency ===
+                                    RRule.WEEKLY.toString() && (
+                                    <div>
+                                      <label>Repeat on:</label>
+                                      {["S", "M", "T", "W", "T", "F", "S"].map(
+                                        (day, dayIndex) => (
+                                          <label key={dayIndex}>
+                                            <input
+                                              type="checkbox"
+                                              checked={
+                                                reminder.frequency?.weekdays[
+                                                  dayIndex
+                                                ]
+                                              }
+                                              onChange={() => {
+                                                const newWeekdays = [
+                                                  ...reminder.frequency
+                                                    .weekdays,
+                                                ];
+                                                newWeekdays[dayIndex] =
+                                                  !newWeekdays[dayIndex];
+                                                handleReminderChange(
+                                                  relationIndex,
+                                                  reminderIndex,
+                                                  "frequency",
+                                                  {
+                                                    ...reminder.frequency,
+                                                    weekdays: newWeekdays,
+                                                  }
+                                                );
+                                              }}
+                                            />
+                                            {day}
+                                          </label>
+                                        )
+                                      )}
+                                    </div>
+                                  )}
+                                  <div>
+                                    <label>Time:</label>
+                                    <DatePicker
+                                      selected={
+                                        new Date(reminder.frequency?.time)
+                                      }
+                                      onChange={(date) =>
+                                        handleReminderChange(
+                                          relationIndex,
+                                          reminderIndex,
+                                          "frequency",
+                                          {
+                                            ...reminder.frequency,
+                                            time: date,
+                                          }
+                                        )
+                                      }
+                                      showTimeSelect
+                                      showTimeSelectOnly
+                                      timeIntervals={15}
+                                      timeCaption="Time"
+                                      dateFormat="h:mm aa"
+                                    />
+                                  </div>
+                                </td>
+                                <td className="px-6 py-4 whitespace-nowrap">
+                                  {/* <div>
                                   <h3>Occurrences:</h3>
                                   <ul>
                                     {(reminder.showAll
@@ -740,52 +743,53 @@ const Settings = () => {
                                     </button>
                                   )}
                                 </div> */}
-                              </td>
-                              <td>
-                                <button
-                                  className="text-red-500"
-                                  type="button"
-                                  onClick={() =>
-                                    handleDeleteReminder(
-                                      relationIndex,
-                                      reminderIndex
-                                    )
-                                  }
-                                >
-                                  Delete
-                                </button>
-                              </td>
-                            </tr>
-                          )
+                                </td>
+                                <td>
+                                  <button
+                                    className="text-red-500"
+                                    type="button"
+                                    onClick={() =>
+                                      handleDeleteReminder(
+                                        relationIndex,
+                                        reminderIndex
+                                      )
+                                    }
+                                  >
+                                    Delete
+                                  </button>
+                                </td>
+                              </tr>
+                            )
+                          )}
+                          <AddReminderButton
+                            key="add-reminder"
+                            onClick={() => handleAddReminder(relationIndex)}
+                          />
+                        </tbody>
+                        {changedRelations[relationIndex] && (
+                          <tr>
+                            <td colSpan="3">
+                              <button
+                                onClick={() =>
+                                  handleConfirmChanges(relationIndex)
+                                }
+                                className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2"
+                              >
+                                Confirm Changes
+                              </button>
+                            </td>
+                          </tr>
                         )}
-                        <AddReminderButton
-                          key="add-reminder"
-                          onClick={() => handleAddReminder(relationIndex)}
-                        />
-                      </tbody>
-                      {changedRelations[relationIndex] && (
-                        <tr>
-                          <td colSpan="3">
-                            <button
-                              onClick={() =>
-                                handleConfirmChanges(relationIndex)
-                              }
-                              className="bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded mb-2"
-                            >
-                              Confirm Changes
-                            </button>
-                          </td>
-                        </tr>
-                      )}
-                    </table>
-                  ) : (
-                    <p>Loading...</p>
-                  )}
-                </td>
-              </tr>
-            ))}
-          </tbody>
-        </table>
+                      </table>
+                    ) : (
+                      <p>Loading...</p>
+                    )}
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </div>
   );

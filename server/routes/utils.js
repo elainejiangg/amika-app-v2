@@ -15,10 +15,29 @@ export async function fetchUserRelations(googleId) {
   }
 }
 
-export async function fetchUserAssistantId(googleId) {
+export async function fetchUserFirstAssistantId(googleId) {
   try {
     const response = await fetch(
-      `http://localhost:5050/users/${googleId}/assistant_id`
+      `http://localhost:5050/users/${googleId}/first_assistant_id`
+    );
+
+    const assistantId = await response.text();
+
+    if (assistantId && assistantId !== "") {
+      return assistantId;
+    } else {
+      return null;
+    }
+  } catch (error) {
+    console.error("Error fetching user assistant id:", error);
+    throw error; // Re-throw the error to handle it in the calling function
+  }
+}
+
+export async function fetchUserSecondAssistantId(googleId) {
+  try {
+    const response = await fetch(
+      `http://localhost:5050/users/${googleId}/second_assistant_id`
     );
 
     const assistantId = await response.text();
@@ -54,10 +73,23 @@ export async function updateUserAssistantId(googleId, assistantId) {
   }
 }
 
-export async function fetchUserThreadId(googleId) {
+export async function fetchUserFirstThreadId(googleId) {
   try {
     const response = await fetch(
-      `http://localhost:5050/users/${googleId}/thread_id`
+      `http://localhost:5050/users/${googleId}/first_thread_id`
+    );
+    const threadId = await response.text();
+    return threadId;
+  } catch (error) {
+    console.error("Error fetching user thread id:", error);
+    throw error; // Re-throw the error to handle it in the calling function
+  }
+}
+
+export async function fetchUserSecondThreadId(googleId) {
+  try {
+    const response = await fetch(
+      `http://localhost:5050/users/${googleId}/second_thread_id`
     );
     const threadId = await response.text();
     return threadId;

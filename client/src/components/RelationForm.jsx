@@ -21,7 +21,7 @@ import { RRule } from "rrule";
 export default function RelationForm() {
   const [form, setForm] = useState({
     name: "",
-    pronouns: "",
+    pronouns: "<they/them>",
     relationship_type: "",
     contact_frequency: [],
     overview: "",

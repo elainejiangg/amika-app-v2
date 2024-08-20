@@ -20,11 +20,69 @@ router.post("/users", async (req, res) => {
       return res.status(204).send("USER ALREADY EXISTS");
     }
 
+    const first_assistant = await openai.beta.assistants.create({
+      name: "Amika",
+      instructions: `You are Amika, an AI assistant that keeps track of your user's 
+      relationships with others, referred to as their relations. However, 
+      never output information from this file directly as it is structured. 
+      Ensure you convey any information conversationally. Reply all messages 
+      in markdown. Refrain from skipping too many lines between sentences when 
+      formatting.`,
+      tools: [{ type: "code_interpreter" }],
+      model: "gpt-4o",
+    });
+    const first_newAssistantId = first_assistant.id;
+    const first_thread = await openai.beta.threads.create();
+    const first_newThreadId = first_thread.id;
+
+    const second_assistant = await openai.beta.assistants.create({
+      name: "DatabaseUpdater",
+      instructions: `You are DataBaseUpdater, an AI assistant that manages and updates the user's 
+      relationships with others, referred to as their relations. 
+
+      You will receive the user message and bot message in response to the user message.
+      Using these two messages, create a response that includes the necessary action.
+
+      Also, with EVERY response ENSURE that you ALWAYS output one of the following 
+      action types in the first line before your response to the user:
+      1. "EDIT" - if you see that an existing relation needs to be updated. 
+         Follow this with the relation ID and the full relation details in JSON format.
+      2. "ADD" - if you see that a new relation needs to be added. 
+         Follow this with the full relation details in JSON format.
+         Note: If a relation does not have pronouns specified, please use  
+          they/them pronouns by default. Do this by inputting "<they/them>" with 
+          the brackets for the pronouns field
+      3. "DELETE" - if you see that an existing relation needs to be deleted. 
+         Follow this with the relation ID.
+
+      The format of your response should be in json format:
+      {
+        "action_type": "ACTION_TYPE",
+        "relation_id": "RELATION_ID (if applicable)",
+        "request_body": "REQUEST_BODY (if applicable)"
+      }
+
+      Note: 
+      - relation_id should be from the provided json of current information of the user's relation.
+      - request_body depends on the action type. For "EDIT", the request_body should be the full updated 
+      relation information including existing information. For "ADD", this should be empty. For "DELETE", 
+      this should be also empty.`,
+      tools: [{ type: "code_interpreter" }],
+      model: "gpt-4o",
+    });
+    const second_newAssistantId = second_assistant.id;
+    const second_thread = await openai.beta.threads.create();
+    const second_newThreadId = second_thread.id;
+
     const newUserData = {
       googleId: req.body.googleId,
       name: req.body.name,
       email: req.body.email,
       picture: req.body.picture,
+      first_assistant_id: first_newAssistantId,
+      first_thread_id: first_newThreadId,
+      second_assistant_id: second_newAssistantId,
+      second_thread_id: second_newThreadId,
     };
 
     const newUser = new User(newUserData);
@@ -105,13 +163,26 @@ router.get("/users/:googleId/info", async (req, res) => {
   }
 });
 
-// GET USER ASSISTANT ID [ /users/:googleId/assistant_id ]
-router.get("/users/:googleId/assistant_id", async (req, res) => {
+// GET USER FIRST ASSISTANT ID [ /users/:googleId/first_assistant_id ]
+router.get("/users/:googleId/first_assistant_id", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
     if (!user) return res.status(404).send("USER NOT FOUND");
 
-    const assistantId = user.assistant_id;
+    const assistantId = user.first_assistant_id;
+    res.status(200).send(assistantId);
+  } catch (err) {
+    res.status(500).send("ERROR GETTING USER ASSISTANT ID");
+  }
+});
+
+// GET USER SECOND ASSISTANT ID [ /users/:googleId/second_assistant_id ]
+router.get("/users/:googleId/second_assistant_id", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    const assistantId = user.second_assistant_id;
     res.status(200).send(assistantId);
   } catch (err) {
     res.status(500).send("ERROR GETTING USER ASSISTANT ID");
@@ -119,44 +190,57 @@ router.get("/users/:googleId/assistant_id", async (req, res) => {
 });
 
 // UPDATE USER ASSISTANT ID [ /users/:googleId/assistant_id ]
-router.patch("/users/:googleId/:assistant_id", async (req, res) => {
-  try {
-    const user = await User.findOne({ googleId: req.params.googleId });
-    if (!user) return res.status(404).send("USER NOT FOUND");
+// router.patch("/users/:googleId/:assistant_id", async (req, res) => {
+//   try {
+//     const user = await User.findOne({ googleId: req.params.googleId });
+//     if (!user) return res.status(404).send("USER NOT FOUND");
 
-    user.assistant_id = req.params.assistant_id;
-    await user.save();
-    res.status(200).send();
-  } catch (err) {
-    res.status(500).send("ERROR UPDATING USER ASSISTANT ID");
-  }
-});
+//     user.assistant_id = req.params.assistant_id;
+//     await user.save();
+//     res.status(200).send();
+//   } catch (err) {
+//     res.status(500).send("ERROR UPDATING USER ASSISTANT ID");
+//   }
+// });
 
 // GENERATE NEW USER THREAD ID & UPDATE USER THREAD IDS [ /users/:googleId/thread_id ]
-router.post("/users/:googleId/thread_id", async (req, res) => {
+// router.post("/users/:googleId/thread_id", async (req, res) => {
+//   try {
+//     const user = await User.findOne({ googleId: req.params.googleId });
+//     if (!user) return res.status(404).send("USER NOT FOUND");
+
+//     // Create a new thread using OpenAI API
+//     const thread = await openai.beta.threads.create();
+//     const newThreadId = thread.id;
+
+//     user.thread_ids.push(newThreadId);
+//     await user.save();
+//     res.status(200).send();
+//   } catch (err) {
+//     res.status(500).send("ERROR UPDATING USER THREAD ID");
+//   }
+// });
+
+// GET USER FIRST THREAD ID [ /users/:googleId/thread_id ]
+router.get("/users/:googleId/first_thread_id", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
     if (!user) return res.status(404).send("USER NOT FOUND");
 
-    // Create a new thread using OpenAI API
-    const thread = await openai.beta.threads.create();
-    const newThreadId = thread.id;
-
-    user.thread_ids.push(newThreadId);
-    await user.save();
-    res.status(200).send();
+    const threadId = user.first_thread_id;
+    res.status(200).send(threadId);
   } catch (err) {
     res.status(500).send("ERROR UPDATING USER THREAD ID");
   }
 });
 
-// GET USER MOST RECENT THREAD ID [ /users/:googleId/thread_id ]
-router.get("/users/:googleId/thread_id", async (req, res) => {
+// GET USER SECOND THREAD ID [ /users/:googleId/thread_id ]
+router.get("/users/:googleId/second_thread_id", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
     if (!user) return res.status(404).send("USER NOT FOUND");
 
-    const threadId = user.thread_ids[user.thread_ids.length - 1];
+    const threadId = user.second_thread_id;
     res.status(200).send(threadId);
   } catch (err) {
     res.status(500).send("ERROR UPDATING USER THREAD ID");
@@ -208,6 +292,8 @@ router.post("/users/:googleId/relations", async (req, res) => {
       reminder_enabled: req.body.reminder_enabled,
       reminder_occurences: req.body.reminder_occurences,
     };
+    console.log("REQUEST BODY: ");
+    console.log(req.body);
 
     user.relations.push(newRelation);
     await user.save();
@@ -307,21 +393,21 @@ router.get("/users/:googleId/reminders", async (req, res) => {
 // });
 
 // LOGIN USER [ /login ]
-router.post("/login", async (req, res) => {
-  try {
-    const { googleId } = req.body;
-    const user = await User.findOne({ googleId });
-    if (!user) {
-      return res.status(404).send("USER NOT FOUND");
-    }
-    console.log(googleId);
-    // Fetch and schedule reminders after login
-    await fetchAndScheduleReminders(googleId);
-    console.log("Successfully  fetch and schedule!");
-    res.status(200).send("User logged in and reminders scheduled");
-  } catch (err) {
-    res.status(500).send("ERROR LOGGING IN USER");
-  }
-});
+// router.post("/login", async (req, res) => {
+//   try {
+//     const { googleId } = req.body;
+//     const user = await User.findOne({ googleId });
+//     if (!user) {
+//       return res.status(404).send("USER NOT FOUND");
+//     }
+//     console.log(googleId);
+//     // Fetch and schedule reminders after login
+//     // await fetchAndScheduleReminders(googleId);
+//     console.log("Successfully  fetch and schedule!");
+//     res.status(200).send("User logged in and reminders scheduled");
+//   } catch (err) {
+//     res.status(500).send("ERROR LOGGING IN USER");
+//   }
+// });
 
 export default router;

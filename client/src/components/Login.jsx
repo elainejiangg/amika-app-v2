@@ -40,26 +40,7 @@ function Login() {
               email: data.email,
               picture: data.picture,
             }),
-          })
-            .then(() => {
-              // Call the login endpoint to fetch and schedule reminders
-              fetch("http://localhost:5050/login", {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-                body: JSON.stringify({ googleId: data.id }),
-              });
-            })
-            .then(() => {
-              // Generate a new thread ID and store it in the database
-              fetch(`http://localhost:5050/users/${data.id}/thread_id`, {
-                method: "POST",
-                headers: {
-                  "Content-Type": "application/json",
-                },
-              });
-            });
+          });
         })
         .catch((err) =>
           console.log(`ERROR GETTING PROFILE FROM GOOGLE API ${err}`)
@@ -68,12 +49,17 @@ function Login() {
   }, [user]);
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen w-screen">
-      <h1 className="font-black text-3xl">AMIKA</h1>
+    <div className="flex flex-col justify-center items-center h-screen w-screen bg-gradient-to-tr from-indigo-100 via-white to-blue-100">
+      <h1
+        className="font-black text-5xl lg:text-6xl text-indigo-950 wildy-sans"
+        style={{ fontFamily: "Wildly Sans, sans-serif" }}
+      >
+        Amika
+      </h1>
       {profile == null ? (
         <button
           onClick={() => login()}
-          className="mt-1.5 inline-flex items-center justify-center whitespace-nowrap text-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-slate-100 h-9 rounded-md px-3"
+          className="mt-4 lg:mt-5 items-center justify-center bg-sky-950 font-bold text-white border border-slate-200 hover:border-blue-200 rounded-xl px-4 py-1 hover:bg-sky-100 hover:text-sky-950 hover:border hover:border-sky-950"
         >
           Sign in with Google
         </button>

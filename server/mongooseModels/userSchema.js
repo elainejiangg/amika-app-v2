@@ -65,8 +65,10 @@ const userSchema = new mongoose.Schema({
   name: String,
   email: String,
   picture: String,
-  assistant_id: String,
-  thread_ids: { type: [String] },
+  first_assistant_id: String,
+  first_thread_id: String,
+  second_assistant_id: String,
+  second_thread_id: String,
   relations: { type: [relationSchema], required: false },
 });
 

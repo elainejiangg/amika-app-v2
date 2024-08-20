@@ -55,7 +55,7 @@ async function initializeSecondAssistant() {
         For case 2 of updating the database, ensure that the request contains only necessary fields and values that need to be updated. Also for case 2, After the word update with a space, include the _id of the relation to be updated. For example, "UPDATE 653f1b7b9b9b9b9b9b9b9b9b {request body}".
         For case 3 of adding a new profile, ensure that the request contains all necessary fields and values that need to be updated.
         For case 4 of deleting a profile, ensure that the request contains the _id of the profile to be deleted similar to how it is done in case 2.
-        Only output in 1 of the 4 options. Do not add any extraneous comments. Include only ONE profile edit/add/delete in a single reply. Do not update mutiple people at once`,
+        Only output in 1 of the 4 options. Do not add any extraneous comments. Include only ONE profile edit/add/delete in a single reply. Do not update mutiple people at once. `,
       tools: [{ type: "code_interpreter" }],
       model: "gpt-4o",
     });

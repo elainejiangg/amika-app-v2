@@ -7,10 +7,7 @@ import path from "path";
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // Load the service account key file
-const SERVICE_ACCOUNT_KEY_FILE = path.join(
-  __dirname,
-  "./amikaTestingCreds.json"
-);
+const SERVICE_ACCOUNT_KEY_FILE = path.join(__dirname, "./amikaCreds.json");
 const serviceAccount = JSON.parse(
   fs.readFileSync(SERVICE_ACCOUNT_KEY_FILE, "utf8")
 );

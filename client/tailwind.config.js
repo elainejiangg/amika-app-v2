@@ -14,6 +14,9 @@ export default {
         "appear-delay2": "appear 1.4s infinite 0.4s",
         "appear-delay3": "appear 1.4s infinite 0.6s",
       },
+      fontFamily: {
+        "wildy-sans": ["Wildy Sans", "sans-serif"],
+      },
     },
   },
   plugins: [],

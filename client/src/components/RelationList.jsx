@@ -21,7 +21,7 @@ export default function RelationsList() {
       }
       const relationsResponse = await response.json();
       setRelations(relationsResponse);
-      console.log("RELATIONS: ", relations);
+      // console.log("RELATIONS: ", relations);
     }
     getRelations();
   }, [profile]);
@@ -40,7 +40,6 @@ export default function RelationsList() {
       setRelations(newRelations);
     } catch (error) {
       console.error("Error deleting relation:", error);
-      // Optionally, you could set an error state here to display to the user
     }
   }
 
@@ -48,70 +47,52 @@ export default function RelationsList() {
   function relationList() {
     return relations.map((relation) => {
       return (
-        <RelationRow
-          relation={relation}
-          deleteRelation={deleteRelation}
-          key={relation._id}
-        />
+        <div className="bg-white bg-gradient-to-t from-indigo-100 to-sky-50 rounded-3xl p-4 max-w-80 min-w-64 h-96">
+          <RelationRow
+            relation={relation}
+            deleteRelation={deleteRelation}
+            key={relation._id}
+          />
+        </div>
       );
     });
   }
 
-  // This following section will display the table with the relations of individuals.
   return (
-    <>
-      <h3 className="text-lg font-semibold p-4">Relations</h3>
-      <div className="border rounded-lg overflow-hidden">
-        <div className="relative w-full overflow-auto">
-          <table className="w-full caption-bottom text-sm ">
-            <thead className="[&amp;_tr]:border-b">
-              <tr className="border-b transition-colors hover:bg-muted/50 data-[state=selected]:bg-muted">
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Name
-                </th>
-
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Pronouns
-                </th>
-
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Relationship Type
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Overview
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Contact Frequency
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Contact History
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Reminder Enabled
-                </th>
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Reminder Frequency
-                </th>
-
-                <th className="h-12 px-4 text-left align-middle font-medium text-muted-foreground [&amp;:has([role=checkbox])]:pr-0">
-                  Action
-                </th>
-              </tr>
-            </thead>
-            <tbody className="[&amp;_tr:last-child]:border-0">
-              {relationList()}
-            </tbody>
-          </table>
+    <div className="pt-8 pb-12 px-4 h-screen">
+      {relations.length === 0 && (
+        <div className="flex h-full w-full justify-center items-center text-center">
+          <div className="text-slate-300 ">
+            <p>No Information on your Relations.</p>
+            <p>Add relations using the "+"!</p>
+          </div>
         </div>
+      )}
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 2xl:grid-cols-4 gap-y-6 gap-x-2 sm:gap-x-[10px] pb-12">
+        {relationList()}
       </div>
+
       <div className="mt-4">
         <button
-          className="bg-white fixed bottom-4 right-4 inline-flex items-center justify-center whitespace-nowrap text-md font-medium ring-offset-background transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-input bg-background hover:bg-slate-100 h-9 rounded-md px-3"
+          className="bg-indigo-300 hover:bg-sky-100 hover:border hover:border-slate-900 fixed bottom-4 right-4 flex items-center justify-center rounded-full h-12 w-12"
           onClick={() => navigate("/users/relations")}
         >
-          Create Relation
+          <svg
+            className="w-6 h-6 text-bold text-2xl"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="3"
+            viewBox="0 0 24 24"
+            xmlns="http://www.w3.org/2000/svg"
+          >
+            <path
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              d="M12 4v16m8-8H4"
+            />
+          </svg>
         </button>
       </div>
-    </>
+    </div>
   );
 }
