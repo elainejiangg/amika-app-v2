@@ -20,8 +20,7 @@ import { fetchAndScheduleReminders } from "../nudgeSys/reminderUtils.js";
 import { verifyToken } from "../middleware/authJwtToken.js"; // Import the verifyToken middleware
 
 const openai = new OpenAI({
-  apiKey:
-    "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",
+  apiKey: "***",
 });
 
 const router = express.Router();
