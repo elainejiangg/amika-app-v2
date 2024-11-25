@@ -5,6 +5,8 @@ import { RRule } from "rrule";
 import "react-datepicker/dist/react-datepicker.css";
 import OtherMethod from "./RelationFormComponents/Modals/OtherMethod";
 import { AuthContext } from "../AuthContext";
+import { OverlayContext } from "../OverlayProvider";
+import Overlay from "./Overlay"; // Import the Overlay component
 
 const reminderOptions = [
   "None",
@@ -51,6 +53,16 @@ const Settings = () => {
   const { profile } = useContext(AuthContext); // get user relation
   const [errors, setErrors] = useState({}); // for validating reminder start and end dates
   const [changedRelations, setChangedRelations] = useState({});
+
+  const { overlayStep, setOverlayStep } = useContext(OverlayContext); // Use OverlayContext
+  const instructions = [
+    "This is your settings page.",
+    "You can view and manage your reminders here.",
+    "You can also edit the email that you receive these reminders at.",
+    "That's it, you're ready to go! Go ahead and start adding relations or start chat away with me! ",
+    "P.S if you ever need this demo again, press on the '?' in the navbar.",
+    "Good-Bye for now!",
+  ];
 
   // Method to fetch all relations from the database.
   useEffect(() => {
@@ -410,8 +422,46 @@ const Settings = () => {
     setChangedRelations((prev) => ({ ...prev, [relationIndex]: true }));
   };
 
+  const handleNext = () => {
+    if (overlayStep < instructions.length - 1) {
+      setOverlayStep(overlayStep + 1);
+    } else {
+      setOverlayStep(null);
+    }
+  };
+
+  const handleSkip = () => {
+    setOverlayStep(null);
+  };
+
+  const getOverlayClassName = (step) => {
+    switch (step) {
+      case 0:
+        return "absolute top-1/8 left-1/2 transform mt-4 flex justify-center";
+      case 1:
+        return "absolute top-1/4 left-1/2 transform -translate-x-1/8 -translate-y-3/4 flex justify-center";
+      case 2:
+        return "absolute top-1/8 mt-4 left-1/2 transform flex justify-center";
+      case 3:
+        return "absolute top-1/8 left-1/2 transform mt-4 flex justify-center";
+      case 4:
+        return "absolute top-1/4 mt-32 ml-4 left-0 transform flex justify-center";
+      case 5:
+        return "absolute top-1/8 left-1/2 transform mt-4 flex justify-center items-center text-center";
+    }
+  };
+
   return (
     <div className="flex flex-col h-full pl-3 w-full lg:w-3/4 max-w-screen-lg ">
+      {overlayStep !== null && (
+        <Overlay
+          step={overlayStep}
+          onNext={handleNext}
+          onSkip={handleSkip}
+          instructions={instructions}
+          className={getOverlayClassName(overlayStep)}
+        />
+      )}
       <div className="mb-4 bg-gradient-to-t from-indigo-100 from-10% via-blue-50 to-sky-50 p-5 rounded-xl">
         <h1 className="font-bold mb-2 text-lg">Account Info</h1>
         <label

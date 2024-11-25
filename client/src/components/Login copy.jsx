@@ -2,8 +2,6 @@ import React, { useState, useEffect, useContext } from "react";
 import { useGoogleLogin } from "@react-oauth/google";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../AuthContext";
-import { set } from "lodash";
-import AmikaFace from "../assets/Amika_face.png";
 
 function Login() {
   const [user, setUser] = useState(null);
@@ -11,8 +9,6 @@ function Login() {
   const [fromLink, setFromLink] = useState(false);
   const [promptChatMsg, setPromptChatMsg] = useState(null);
   const [newUser, setNewUser] = useState(false);
-  const [errorMsg, setErrorMsg] = useState("");
-  const [creatingAccount, setCreatingAccount] = useState(false);
 
   const navigate = useNavigate();
 
@@ -91,13 +87,6 @@ function Login() {
     }
   }, []);
 
-  // Reset creatingAccount state when user changes
-  // useEffect(() => {
-  //   if (user) {
-  //     setCreatingAccount(false);
-  //   }
-  // }, [user]);
-
   // ! Should check if on chat page first
   useEffect(() => {
     if (promptChatMsg) {
@@ -129,61 +118,28 @@ function Login() {
           );
           const isNewData = await isNewResponse.json();
 
-          if (isNewData.isNew) {
-            if (creatingAccount) {
-              console.log("new account", creatingAccount);
-              console.log("new user", newUser);
+          setProfile(data);
 
-              setNewUser(true);
-              // Call the new route to store the user profile
-              // await fetch("http://localhost:5050/users", {
-              //   method: "POST",
-              //   headers: {
-              //     "Content-Type": "application/json",
-              //   },
-              //   body: JSON.stringify({
-              //     googleId: data.id,
-              //     name: data.name,
-              //     email: data.email,
-              //     picture: data.picture,
-              //   }),
-              // });
+          // Call the new route to store the user profile
+          await fetch("http://localhost:5050/users", {
+            method: "POST",
+            headers: {
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              googleId: data.id,
+              name: data.name,
+              email: data.email,
+              picture: data.picture,
+            }),
+          });
 
-              // try {
-              //   await fetch(
-              //     `http://localhost:5050/users/${data.id}/thread_ids`,
-              //     {
-              //       method: "POST",
-              //     }
-              //   );
-              // } catch (err) {
-              //   console.log(`ERROR GENERATING NEW THREAD IDS ${err}`);
-              // }
-              await setProfile({
-                id: data.id,
-                name: data.name,
-                email: data.email,
-                picture: data.picture,
-              });
-              console.log("PROFILE:", profile.email);
-              navigate("/new-user");
-            } else {
-              setNewUser(true);
-              setErrorMsg("No account found");
-              set;
-            }
-          } else {
-            if (creatingAccount) {
-              setErrorMsg("Account already exists with user");
-            } else {
-              await setProfile({
-                id: data.id,
-                name: data.name,
-                email: data.email,
-                picture: data.picture,
-              });
-              navigate("/relations");
-            }
+          try {
+            await fetch(`http://localhost:5050/users/${data.id}/thread_ids`, {
+              method: "POST",
+            });
+          } catch (err) {
+            console.log(`ERROR GENERATING NEW THREAD IDS ${err}`);
           }
         } catch (err) {
           console.log(`ERROR GETTING PROFILE FROM GOOGLE API ${err}`);
@@ -195,56 +151,33 @@ function Login() {
   }, [user]);
 
   return (
-    <div className="flex flex-col justify-center items-center h-screen w-screen bg-gradient-to-tr from-indigo-200 via-white to-violet-100">
-      <div className="flex">
-        <img
-          src={AmikaFace}
-          alt="Amika Face"
-          className="w-20 h-20 mr-2 mt-10"
-        />
-        <h1
-          className="font-black text-9xl lg:text-10xl text-sky-950 wildy-sans flex items-center"
-          style={{ fontFamily: "Wildly Sans, sans-serif" }}
-        >
-          amika
-        </h1>
-      </div>
-      <p
-        className="text-center leading-4 text-2xl pb-2 w-1/2 min-w-96 tracking-tighter"
-        // className="px-8 py-4 flex text-center items-center mb-8 text-2xl text-sky-950 border rounded-md border-cyan-800 font-bold w-1/2 min-w-72"
+    <div className="flex flex-col justify-center items-center h-screen w-screen bg-gradient-to-tr from-indigo-100 via-white to-blue-100">
+      <h1
+        className="font-black text-5xl lg:text-6xl text-indigo-950 wildy-sans"
         style={{ fontFamily: "Wildly Sans, sans-serif" }}
       >
-        your personal ai assistant to help you keep in touch with your Loved
-        ones
-      </p>
+        Amika
+      </h1>
 
       {profile == null && !fromLink && !newUser ? (
         <>
           <button
-            onClick={() => {
-              setCreatingAccount(false);
-              login();
-            }}
-            className="mt-4 py-2 w-1/6 min-w-56 leading-6 text-md -translate-y-3 mb-0 lg:mt-5 items-center justify-center bg-sky-950 font-bold text-white border border-slate-200 hover:border-blue-200 rounded-xl px-4 py-1 hover:bg-sky-100 hover:text-sky-950 hover:border hover:border-sky-950"
-            // style={{ fontFamily: "Wildly Sans, sans-serif" }}
+            onClick={() => login()}
+            className="w-1/6 min-w-56  mt-4 mb-0 lg:mt-5 items-center justify-center bg-sky-950 font-bold text-white border border-slate-200 hover:border-blue-200 rounded-xl px-4 py-1 hover:bg-sky-100 hover:text-sky-950 hover:border hover:border-sky-950"
           >
             Sign in with Google
           </button>
           <button
-            onClick={() => {
-              setCreatingAccount(true);
-              login();
-            }}
-            className="  py-2 text-md w-1/6 min-w-56 leading-6 mt-1 -translate-y-2 items-center justify-center bg-sky-950 font-bold text-white border border-slate-200 hover:border-blue-200 rounded-xl px-4 py-1 hover:bg-sky-100 hover:text-sky-950 hover:border hover:border-sky-950"
-            // style={{ fontFamily: "Wildly Sans, sans-serif" }}
+            onClick={() => login()}
+            className="mt-2 w-1/6 min-w-56 items-center justify-center bg-sky-950 font-bold text-white border border-slate-200 hover:border-blue-200 rounded-xl px-4 py-1 hover:bg-sky-100 hover:text-sky-950 hover:border hover:border-sky-950"
           >
             Create an account with Google
           </button>
-          {errorMsg && <p className="text-red-500">{errorMsg}</p>}
         </>
       ) : (
-        navigate(newUser ? "/new-user" : "/relations")
+        navigate("/relations")
       )}
+
       {fromLink && navigate("/chat")}
     </div>
   );

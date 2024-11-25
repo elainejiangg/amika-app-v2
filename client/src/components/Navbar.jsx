@@ -1,33 +1,34 @@
-import { NavLink } from "react-router-dom";
-import { useContext, useEffect } from "react";
+import { NavLink, useNavigate } from "react-router-dom";
+import { useContext, useEffect, useState } from "react";
 import { googleLogout } from "@react-oauth/google";
 import { AuthContext } from "../AuthContext";
-// import jwtDecode from "jwt-decode";
+import { OverlayContext } from "../OverlayProvider";
 
 export default function Navbar({ toggleNavbar, xVisible }) {
   const { profile, setProfile } = useContext(AuthContext);
+  const { userInfo, setUserInfo } = useState("");
+  const { startOverlaySequence } = useContext(OverlayContext); // Use OverlayContext
+  const navigate = useNavigate(); // Initialize useNavigate
 
-  useEffect(() => {
-    const token = new URLSearchParams(window.location.search).get("token");
-    if (token) {
-      const decoded = jwtDecode(token);
-      fetch(`http://localhost:5050/users/${decoded.googleId}/info`, {
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
-      })
-        .then((response) => response.json())
-        .then((data) => {
-          setProfile(data);
-        })
-        .catch((err) => console.error("Error fetching profile:", err));
+  const getGoogleDriveImageUrl = (url) => {
+    const match = url.match(/\/d\/(.*?)\//);
+    if (match) {
+      const imageUrl = `https://drive.google.com/thumbnail?id=${match[1]}`;
+      console.log("Constructed Google Drive Image URL:", imageUrl);
+      return imageUrl;
     }
-  }, [setProfile]);
+    return url;
+  };
 
   const logOut = () => {
     googleLogout();
     setProfile(null);
     sessionStorage.removeItem("chatHistory");
+  };
+
+  const handleHelpClick = () => {
+    navigate("/chat"); // Navigate to /chat
+    startOverlaySequence(); // Start overlay sequence
   };
 
   if (!profile) {
@@ -55,7 +56,7 @@ export default function Navbar({ toggleNavbar, xVisible }) {
         </button>
       )}
 
-      <nav className="flex flex-col justify-between items-center mb-8">
+      <nav className="flex flex-col justify-between items-center mb-2">
         <div className="flex flex-row p-0 md:p-2 pt-4 w-full items-center justify-start space-x-2">
           <img
             src={profile.picture}
@@ -66,9 +67,10 @@ export default function Navbar({ toggleNavbar, xVisible }) {
             onLoad={(e) => (e.target.style.display = "block")}
             onError={(e) => (e.target.style.display = "none")}
           />
+
           <div className="pl-0 py-3">
             <p className="leading-4 font-bold text-lg tracking-tight">
-              {profile.name.toUpperCase()}
+              {profile.name ? profile.name.toUpperCase() : "User"}
             </p>
             <NavLink
               to="/"
@@ -98,6 +100,14 @@ export default function Navbar({ toggleNavbar, xVisible }) {
           Settings
         </NavLink>
       </nav>
+      <div className="flex  justify-end">
+        <button
+          className="my-1 w-12 h-12 font-semibold bg-sky-950 text-center text-white rounded-full text-sm md:text-lg hover:bg-sky-100 hover:text-sky-950 hover:border hover:border-sky-950 flex items-center justify-center"
+          onClick={handleHelpClick} // Start overlay sequence on click
+        >
+          ?
+        </button>
+      </div>
     </div>
   );
 }

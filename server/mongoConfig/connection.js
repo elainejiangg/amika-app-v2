@@ -2,8 +2,7 @@ import mongoose from "mongoose";
 
 // Format of connection url: mongodb+srv://<username>:<password>@<cluster-url>/<dbname>?retryWrites=true&w=majority
 const URI =
-  "mongodb+srv://amika:rokpQxuSC9oa4DIU@amika-test.vht9oy6.mongodb.net/amika-dev?retryWrites=true&w=majority&appName=amika-test";
-
+  "mongodb+srv://admin:amikachats%40fluid2024@cluster0.ws5q7.mongodb.net/?retryWrites=true&w=majority&appName=Cluster0";
 const connectDB = async () => {
   try {
     const conn = await mongoose.connect(URI);

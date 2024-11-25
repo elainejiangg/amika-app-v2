@@ -3,13 +3,35 @@ import { User } from "../mongooseModels/userSchema.js"; // import schemas ( & su
 import { sendEmail } from "../nudgeSys/emailService.js";
 import { fetchAndScheduleReminders } from "../nudgeSys/reminderUtils.js";
 import { OpenAI } from "openai";
+import { verifyToken } from "../middleware/authJwtToken.js"; // Import the verifyToken middleware
 
 const router = express.Router();
 const openai = new OpenAI({
-  apiKey: "sk-proj-475iAtQOgswTukttWClwT3BlbkFJVps9XItTpGqmOLOflz5E",
+  apiKey:
+    "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",
 });
 
 ///////////////////// ENDPOINTS /////////////////////
+// Add the verify-token endpoint
+router.post("/auth/verify-token", verifyToken, (req, res) => {
+  res
+    .status(200)
+    .json({ success: true, message: "Token is valid", user: req.user });
+});
+
+// CHECK IF USER IS NEW [ /users/:googleId/isNew ]
+router.get("/users/:googleId/isNew", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (user) {
+      return res.status(200).json({ isNew: false });
+    } else {
+      return res.status(200).json({ isNew: true });
+    }
+  } catch (err) {
+    res.status(500).send("ERROR CHECKING USER STATUS");
+  }
+});
 
 // CREATE SINGLE USER [ /users ]
 router.post("/users", async (req, res) => {
@@ -32,8 +54,8 @@ router.post("/users", async (req, res) => {
       model: "gpt-4o",
     });
     const first_newAssistantId = first_assistant.id;
-    const first_thread = await openai.beta.threads.create();
-    const first_newThreadId = first_thread.id;
+    // const first_thread = await openai.beta.threads.create();
+    // const first_newThreadId = first_thread.id;
 
     const second_assistant = await openai.beta.assistants.create({
       name: "DatabaseUpdater",
@@ -71,18 +93,21 @@ router.post("/users", async (req, res) => {
       model: "gpt-4o",
     });
     const second_newAssistantId = second_assistant.id;
-    const second_thread = await openai.beta.threads.create();
-    const second_newThreadId = second_thread.id;
+    // const second_thread = await openai.beta.threads.create();
+    // const second_newThreadId = second_thread.id;
 
     const newUserData = {
       googleId: req.body.googleId,
-      name: req.body.name,
       email: req.body.email,
+      first_name: req.body.first_name,
+      last_name: req.body.last_name,
+      pronouns: req.body.pronouns,
       picture: req.body.picture,
+      interests: req.body.interests,
       first_assistant_id: first_newAssistantId,
-      first_thread_id: first_newThreadId,
+      first_thread_ids: [],
       second_assistant_id: second_newAssistantId,
-      second_thread_id: second_newThreadId,
+      second_thread_ids: [],
     };
 
     const newUser = new User(newUserData);
@@ -152,14 +177,39 @@ router.get("/users/:googleId/info", async (req, res) => {
     if (!user) return res.status(404).send("USER NOT FOUND");
 
     const userInfo = {
-      name: user.name,
+      first_name: user.first_name,
+      last_name: user.last_name,
+      pronouns: user.pronouns,
       email: user.email,
       assistant_id: user.assistant_id,
+      picture: user.picture,
+      interests: user.interests,
     };
+    console.log("USER INFO", userInfo);
 
     res.status(200).send(userInfo);
   } catch (err) {
     res.status(500).send("ERROR GETTING USER INFO");
+  }
+});
+
+// UPDATE USER INFO [ /users/:googleId/info ]
+router.patch("/users/:googleId/info", async (req, res) => {
+  try {
+    const { googleId } = req.params;
+    const updatedData = req.body;
+
+    const user = await User.findOne({ googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    // Update the user with the new data
+    Object.assign(user, updatedData);
+
+    await user.save();
+
+    res.status(200).json(user);
+  } catch (err) {
+    res.status(500).send("ERROR UPDATING USER INFO");
   }
 });
 
@@ -203,17 +253,35 @@ router.get("/users/:googleId/second_assistant_id", async (req, res) => {
 //   }
 // });
 
-// GENERATE NEW USER THREAD ID & UPDATE USER THREAD IDS [ /users/:googleId/thread_id ]
-// router.post("/users/:googleId/thread_id", async (req, res) => {
+// GENERATE NEW USER THREAD IDS [ /users/:googleId/thread_ids ]
+router.post("/users/:googleId/thread_ids", async (req, res) => {
+  try {
+    const user = await User.findOne({ googleId: req.params.googleId });
+    if (!user) return res.status(404).send("USER NOT FOUND");
+
+    // Create a new thread using OpenAI API
+    const first_thread = await openai.beta.threads.create();
+    user.first_thread_ids.push(first_thread.id);
+
+    const second_thread = await openai.beta.threads.create();
+    user.second_thread_ids.push(second_thread.id);
+
+    await user.save();
+    res.status(200).send();
+  } catch (err) {
+    res.status(500).send("ERROR UPDATING USER THREAD ID");
+  }
+});
+
+// GENERATE NEW USER SECOND THREAD ID & UPDATE USER SECOND THREAD IDS [ /users/:googleId/second_thread_id ]
+// router.post("/users/:googleId/second_thread_id", async (req, res) => {
 //   try {
 //     const user = await User.findOne({ googleId: req.params.googleId });
+//     consol;
 //     if (!user) return res.status(404).send("USER NOT FOUND");
 
 //     // Create a new thread using OpenAI API
-//     const thread = await openai.beta.threads.create();
-//     const newThreadId = thread.id;
 
-//     user.thread_ids.push(newThreadId);
 //     await user.save();
 //     res.status(200).send();
 //   } catch (err) {
@@ -221,31 +289,60 @@ router.get("/users/:googleId/second_assistant_id", async (req, res) => {
 //   }
 // });
 
-// GET USER FIRST THREAD ID [ /users/:googleId/thread_id ]
+// GET MOST RECENT USER FIRST THREAD ID [ /users/:googleId/first_thread_id ]
 router.get("/users/:googleId/first_thread_id", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
     if (!user) return res.status(404).send("USER NOT FOUND");
 
-    const threadId = user.first_thread_id;
-    res.status(200).send(threadId);
+    // Check if the first_thread_ids array is not empty
+    if (user.first_thread_ids.length === 0) {
+      return res.status(404).send("NO THREADS FOUND");
+    }
+
+    // Get the most recent thread ID (last item in the array)
+    const mostRecentThreadId =
+      user.first_thread_ids[user.first_thread_ids.length - 1];
+    res.status(200).send(mostRecentThreadId);
   } catch (err) {
-    res.status(500).send("ERROR UPDATING USER THREAD ID");
+    console.error("Error getting most recent first thread ID:", err);
+    res.status(500).send("ERROR GETTING MOST RECENT FIRST THREAD ID");
   }
 });
 
-// GET USER SECOND THREAD ID [ /users/:googleId/thread_id ]
+// GET MOST RECENT USER SECOND THREAD ID [ /users/:googleId/first_thread_id ]
 router.get("/users/:googleId/second_thread_id", async (req, res) => {
   try {
     const user = await User.findOne({ googleId: req.params.googleId });
     if (!user) return res.status(404).send("USER NOT FOUND");
 
-    const threadId = user.second_thread_id;
-    res.status(200).send(threadId);
+    // Check if the first_thread_ids array is not empty
+    if (user.second_thread_ids.length === 0) {
+      return res.status(404).send("NO THREADS FOUND");
+    }
+
+    // Get the most recent thread ID (last item in the array)
+    const mostRecentThreadId =
+      user.second_thread_ids[user.second_thread_ids.length - 1];
+    res.status(200).send(mostRecentThreadId);
   } catch (err) {
-    res.status(500).send("ERROR UPDATING USER THREAD ID");
+    console.error("Error getting most recent first thread ID:", err);
+    res.status(500).send("ERROR GETTING MOST RECENT FIRST THREAD ID");
   }
 });
+
+// GET USER FIRST THREAD ID [ /users/:googleId/thread_id ]
+// router.get("/users/:googleId/first_thread_id", async (req, res) => {
+//   try {
+//     const user = await User.findOne({ googleId: req.params.googleId });
+//     if (!user) return res.status(404).send("USER NOT FOUND");
+
+//     const threadId = user.first_thread_id;
+//     res.status(200).send(threadId);
+//   } catch (err) {
+//     res.status(500).send("ERROR UPDATING USER THREAD ID");
+//   }
+// });
 
 // GET ALL RELATIONS of a user [ /<googleId>/relations ]
 router.get("/users/:googleId/relations", async (req, res) => {
@@ -283,7 +380,9 @@ router.post("/users/:googleId/relations", async (req, res) => {
 
     const newRelation = {
       name: req.body.name,
+      picture: req.body.picture,
       pronouns: req.body.pronouns,
+
       relationship_type: req.body.relationship_type,
       contact_frequency: req.body.contact_frequency,
       overview: req.body.overview,

@@ -18,6 +18,7 @@ export default function ReminderEnabled({ form, updateForm }) {
           placeholder="First Last"
           checked={form.reminder_enabled}
           onChange={(e) => updateForm({ reminder_enabled: e.target.checked })}
+          autocomplete="off"
         />
       </div>
     </div>

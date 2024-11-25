@@ -19,6 +19,7 @@ export default function Name({ form, updateForm }) {
             placeholder="First Last"
             value={form.name}
             onChange={(e) => updateForm({ name: e.target.value })}
+            autocomplete="off"
           />
         </div>
       </div>

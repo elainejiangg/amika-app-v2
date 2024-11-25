@@ -10,7 +10,10 @@ import ContactHistory from "./RelationFormComponents/ContactHistory";
 import ReminderEnabled from "./RelationFormComponents/ReminderEnabled";
 import ContactFrequency from "./RelationFormComponents/ContactFrequency";
 import ReminderFrequency from "./RelationFormComponents/ReminderFrequency";
+import Picture from "./RelationFormComponents/Picture";
 import { RRule } from "rrule";
+import Overlay from "./Overlay"; // Import the Overlay component
+import { OverlayContext } from "../OverlayProvider";
 
 // RRule.DAILY    // 3
 // RRule.WEEKLY   // 2
@@ -21,6 +24,7 @@ import { RRule } from "rrule";
 export default function RelationForm() {
   const [form, setForm] = useState({
     name: "",
+    picture: "",
     pronouns: "<they/them>",
     relationship_type: "",
     contact_frequency: [],
@@ -33,6 +37,23 @@ export default function RelationForm() {
   const params = useParams();
   const navigate = useNavigate();
   const { profile } = useContext(AuthContext);
+
+  const { overlayStep, setOverlayStep } = useContext(OverlayContext); // Use OverlayContext
+  const instructions = [
+    "This is the form you will reach after clicking '+'. Here, you can manually input information about a relation!",
+    "You can fill out your relation's name, upload a picture for the relation, specify their pronouns, describe the relationship type, provide an overview of the relation, set the contact history and frequency, enable reminders if needed",
+  ];
+
+  const getOverlayClassName = (step) => {
+    switch (step) {
+      case 0:
+        return "absolute top-1/4 mt-4 left-1/4 transform -translate-y-3/4 flex justify-center";
+      case 1:
+        return "absolute top-1/4 mt-8 left-1/4 transform -translate-y-3/4 flex justify-center";
+      case 2:
+        return "absolute bottom-0 right-0 transform -translate-x-1/4 mb-4 flex justify-center";
+    }
+  };
 
   useEffect(() => {
     async function fetchData() {
@@ -156,7 +177,8 @@ export default function RelationForm() {
     } finally {
       setForm({
         name: "",
-        pronouns: "",
+        picture: "",
+        pronouns: "<they/them>",
         relationship_type: "",
         contact_frequency: [],
         overview: "",
@@ -168,9 +190,31 @@ export default function RelationForm() {
     }
   }
 
+  const handleNext = () => {
+    if (overlayStep < instructions.length - 1) {
+      setOverlayStep(overlayStep + 1);
+    } else {
+      setOverlayStep(0);
+      navigate("/settings");
+    }
+  };
+
+  const handleSkip = () => {
+    setOverlayStep(null); // Hide overlay
+  };
+
   // This following section will display the form that takes the input from the user.
   return (
     <>
+      {overlayStep !== null && (
+        <Overlay
+          step={overlayStep}
+          onNext={handleNext}
+          onSkip={handleSkip}
+          instructions={instructions}
+          className={getOverlayClassName(overlayStep)}
+        />
+      )}
       <h3 className="text-lg font-semibold p-4">Relation Form</h3>
       <form
         onSubmit={onSubmit}
@@ -185,6 +229,7 @@ export default function RelationForm() {
 
           <div className="grid max-w-2xl grid-cols-1 gap-x-6 gap-y-8">
             <Name form={form} updateForm={updateForm} />
+            <Picture form={form} updateForm={updateForm} />
             <Pronouns form={form} updateForm={updateForm} />
             <RelationshipType form={form} updateForm={updateForm} />
             <Overview form={form} updateForm={updateForm} />

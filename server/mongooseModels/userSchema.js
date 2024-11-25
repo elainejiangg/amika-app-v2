@@ -51,6 +51,7 @@ const reminderFrequencySchema = new mongoose.Schema({
 
 const relationSchema = new mongoose.Schema({
   name: { type: String, required: true }, // Profile's name
+  picture: { type: String, required: false },
   pronouns: { type: String, required: false },
   relationship_type: { type: String, required: false },
   contact_frequency: { type: [contactFrequencySchema], required: false }, // [method, [frequency: [number, unit of time]]]
@@ -62,13 +63,16 @@ const relationSchema = new mongoose.Schema({
 
 const userSchema = new mongoose.Schema({
   googleId: { type: String, required: true, unique: true },
-  name: String,
   email: String,
+  first_name: String,
+  last_name: String,
+  pronouns: String,
   picture: String,
+  interests: String,
   first_assistant_id: String,
-  first_thread_id: String,
+  first_thread_ids: { type: [String], required: false },
   second_assistant_id: String,
-  second_thread_id: String,
+  second_thread_ids: { type: [String], required: false },
   relations: { type: [relationSchema], required: false },
 });
 

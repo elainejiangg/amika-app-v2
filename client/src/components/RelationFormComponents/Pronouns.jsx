@@ -19,6 +19,7 @@ export default function Pronouns({ form, updateForm }) {
             placeholder="she/her, he/him, they/them, etc."
             value={form.pronouns !== "<they/them>" ? form.pronouns : ""}
             onChange={(e) => updateForm({ pronouns: e.target.value })}
+            autocomplete="off"
           />
         </div>
       </div>

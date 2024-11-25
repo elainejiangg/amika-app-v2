@@ -17,9 +17,11 @@ import express from "express";
 import OpenAI from "openai";
 import { User } from "../mongooseModels/userSchema.js";
 import { fetchAndScheduleReminders } from "../nudgeSys/reminderUtils.js";
+import { verifyToken } from "../middleware/authJwtToken.js"; // Import the verifyToken middleware
 
 const openai = new OpenAI({
-  apiKey: "sk-proj-475iAtQOgswTukttWClwT3BlbkFJVps9XItTpGqmOLOflz5E",
+  apiKey:
+    "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",
 });
 
 const router = express.Router();
@@ -29,6 +31,9 @@ const userFirstAssistants = new Map();
 const userFirstThreads = new Map();
 const userSecondAssistants = new Map();
 const userSecondThreads = new Map();
+
+var todayDate = new Date();
+var dd = String(todayDate.getDate()); // Today's Date for instructions
 
 function generateFirstInstructions(relations) {
   return `You are Amika, an AI assistant that keeps track of your user's 
@@ -54,7 +59,8 @@ function generateFirstInstructions(relations) {
   d. changes to reminder scheduling of an existing relation.
   
   Remember, the first line of your response must always be "NULL" or "UPDATE".
-  
+
+  Today is ${dd}.
   `;
 }
 
@@ -163,12 +169,9 @@ async function initializeFirstAssistant(googleId) {
     firstAssistantId = await fetchUserFirstAssistantId(googleId); // fetch from database
     userFirstAssistants.set(googleId, assistantId);
   }
-
-  let firstThreadId = userFirstThreads.get(googleId);
-  if (!firstThreadId) {
-    firstThreadId = await fetchUserFirstThreadId(googleId);
-    userFirstThreads.set(googleId, firstThreadId);
-  }
+  console.log("BEFORE:");
+  const firstThreadId = await fetchUserFirstThreadId(googleId);
+  console.log("USING THREAD ONE: ", firstThreadId);
 
   return { firstAssistantId, firstThreadId };
 }
@@ -180,11 +183,8 @@ async function initializeSecondAssistant(googleId) {
     userSecondAssistants.set(googleId, secondAssistantId);
   }
 
-  let secondThreadId = userSecondThreads.get(googleId);
-  if (!secondThreadId) {
-    secondThreadId = await fetchUserSecondThreadId(googleId);
-    userSecondThreads.set(googleId, secondThreadId);
-  }
+  const secondThreadId = await fetchUserSecondThreadId(googleId);
+  console.log("USING THREAD TWO: ", secondThreadId);
 
   console.log("userSecondAssistants", userSecondAssistants);
   console.log("userSecondThreads", userSecondThreads);
@@ -197,8 +197,92 @@ async function initializeSecondAssistant(googleId) {
   return { secondAssistantId, secondThreadId };
 }
 
+router.post("/prompt", async (req, res) => {
+  const { message, googleId } = req.body;
+
+  try {
+    const { firstAssistantId, firstThreadId } = await initializeFirstAssistant(
+      googleId
+    );
+
+    console.log(
+      `Using assistant ${firstAssistantId} and thread ${firstThreadId} for user ${googleId}`
+    );
+    console.log("userFirstAssistants", userFirstAssistants);
+    console.log("userFirstThreads", userFirstThreads);
+    // Send user message to the thread
+    await openai.beta.threads.messages.create(firstThreadId, {
+      role: "user",
+      content: message,
+    });
+
+    // Run the assistant
+    const run = await openai.beta.threads.runs.create(firstThreadId, {
+      assistant_id: firstAssistantId,
+    });
+
+    // Wait for the run to complete
+    let runStatus = await openai.beta.threads.runs.retrieve(
+      firstThreadId,
+      run.id
+    );
+
+    while (runStatus.status !== "completed") {
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Wait for 1 second before checking the status again
+      runStatus = await openai.beta.threads.runs.retrieve(
+        firstThreadId,
+        run.id
+      );
+    }
+
+    // Retrieve the assistant's messages
+    const messages = await openai.beta.threads.messages.list(firstThreadId);
+
+    const formattedMessages = messages.data.map((msg, index) => {
+      let content = msg.content[0].text.value;
+
+      if (
+        index === 0 &&
+        !content.startsWith("NULL") &&
+        !content.startsWith("UPDATE")
+      ) {
+        console.log("DEFAULT NULL MESSAGE");
+        content = "NULL \n \n" + content; // Default to "NULL" if not specified
+        msg.content[0].text.value = content;
+      }
+      return {
+        role: msg.role,
+        content: content,
+      };
+    });
+    console.log("LATEST:", messages.data[0].content[0].text.value);
+    console.log("SECOND LATEST", messages.data[1].content[0].text.value);
+
+    try {
+      if (messages.data[0].content[0].text.value.startsWith("UPDATE")) {
+        // send first assistant message and the user message that triggered it
+
+        await secondAssistantProcess(
+          googleId,
+          messages.data[0].content[0].text.value,
+          messages.data[1].content[0].text.value
+        );
+      }
+    } catch (err) {
+      console.log("ERROR WITH SECOND ASSISTANT: ", err);
+    }
+
+    // Send the complete chat history back to the client
+    res.status(200).json({ messages: formattedMessages });
+  } catch (error) {
+    console.error(`Error processing message for user ${googleId}:`, error);
+    res.status(500).send("Error communicating with OpenAI API");
+  }
+});
+
 router.post("/ask", async (req, res) => {
   const { message, googleId } = req.body;
+
   try {
     const { firstAssistantId, firstThreadId } = await initializeFirstAssistant(
       googleId
@@ -342,17 +426,51 @@ async function secondAssistantProcess(googleId, botMessage, userMessage) {
   // Parse the JSON response
   let parsedResponse;
   try {
-    parsedResponse = JSON.parse(latestMsg);
-    console.log("parsedResponse:", parsedResponse);
+    // parsedResponse = JSON.parse(latestMsg);
+    // console.log("parsedResponse:", parsedResponse);
+    // Find the first '{' and the last '}' to extract the JSON content
+    const startIndex = latestMsg.indexOf("{");
+    const endIndex = latestMsg.lastIndexOf("}") + 1;
+
+    if (startIndex !== -1 && endIndex !== -1) {
+      const jsonString = latestMsg.substring(startIndex, endIndex);
+      console.log("BEFORE: ", jsonString);
+      parsedResponse = JSON.parse(jsonString);
+      console.log("PARSED: ", parsedResponse);
+    } else {
+      throw new Error("JSON content not found in the message");
+    }
   } catch (error) {
     console.error("ERROR PARSING JSON RESPONSE FROM CHAT:", error);
     return;
   }
+  console.log("ACTION: ", parsedResponse["action_type"]);
+  console.log("ID: ", parsedResponse["relation_id"]);
+  console.log("REQUEST: ", parsedResponse["request_body"]);
 
   const { action_type, relation_id, request_body } = parsedResponse;
 
+  // Function to remove comments from JSON string
+  function removeComments(jsonString) {
+    return jsonString.replace(/\/\/.*|\/\*[\s\S]*?\*\/|#.*$/gm, "").trim();
+  }
+
+  // Convert request_body to string, remove comments, and parse back to JSON
+  let cleanedRequestBody;
+  try {
+    cleanedRequestBody = request_body;
+    // JSON.parse(
+    //   removeComments(JSON.stringify(request_body))
+    // ); // FUNKY! removed this made it work
+  } catch (error) {
+    console.error("Error parsing cleaned request body:", error);
+    return;
+  }
+
+  console.log("before cleaned request body: ", cleanedRequestBody);
+
   console.log("PROCESSED UPDATE:");
-  console.log(action_type, relation_id, request_body);
+  console.log(action_type, relation_id, cleanedRequestBody);
 
   // Edit an existing relation: EDIT, relation_id, request_body is full relation
   if (action_type === "EDIT") {
@@ -364,7 +482,7 @@ async function secondAssistantProcess(googleId, botMessage, userMessage) {
           headers: {
             "Content-Type": "application/json",
           },
-          body: JSON.stringify(request_body),
+          body: JSON.stringify(cleanedRequestBody),
         }
       );
     } catch (error) {
@@ -380,7 +498,7 @@ async function secondAssistantProcess(googleId, botMessage, userMessage) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify(request_body),
+        body: JSON.stringify(cleanedRequestBody),
       });
     } catch (error) {
       console.error("ERROR ADDING A NEW RELATION FROM CHAT:", error);

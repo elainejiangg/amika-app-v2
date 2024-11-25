@@ -78,7 +78,9 @@ export async function fetchUserFirstThreadId(googleId) {
     const response = await fetch(
       `http://localhost:5050/users/${googleId}/first_thread_id`
     );
+
     const threadId = await response.text();
+    console.log("RESPONSE 1st THREAD: ", threadId);
     return threadId;
   } catch (error) {
     console.error("Error fetching user thread id:", error);
@@ -91,7 +93,9 @@ export async function fetchUserSecondThreadId(googleId) {
     const response = await fetch(
       `http://localhost:5050/users/${googleId}/second_thread_id`
     );
+
     const threadId = await response.text();
+    console.log("RESPONSE 2nd THREAD: ", threadId);
     return threadId;
   } catch (error) {
     console.error("Error fetching user thread id:", error);

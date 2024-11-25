@@ -21,6 +21,7 @@ export default function Overview({ form, updateForm }) {
             onChange={(e) => {
               updateForm({ overview: e.target.value });
             }}
+            autocomplete="off"
           />
         </div>
       </div>

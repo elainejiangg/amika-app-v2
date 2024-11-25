@@ -10,6 +10,9 @@ import { GoogleOAuthProvider } from "@react-oauth/google";
 import { AuthProvider } from "./AuthContext";
 import Settings from "./components/Settings";
 import Chat from "./components/Chat";
+import NewUser from "./components/NewUser";
+import { OverlayProvider } from "./OverlayProvider";
+import UserInfoForm from "./components/UserInfoForm"; 
 
 const clientId =
   "182357756258-759f39bnehg84lammns3g3rcvnqjte2u.apps.googleusercontent.com";
@@ -20,6 +23,11 @@ const router = createBrowserRouter([
     path: "/",
     element: <Login />,
   },
+  {
+    path: "/new-user",
+    element: <NewUser />,
+  },
+
   {
     path: "/relations",
     element: <App />,
@@ -51,6 +59,17 @@ const router = createBrowserRouter([
     ],
   },
   {
+    path: "/profile/edit",
+    element: <App />,
+    children: [
+      {
+        path: "/profile/edit",
+        element: <UserInfoForm />,
+      },
+    ],
+  },
+
+  {
     path: "/settings",
     element: <App />,
     children: [
@@ -75,9 +94,11 @@ const router = createBrowserRouter([
 ReactDOM.createRoot(document.getElementById("root")).render(
   <GoogleOAuthProvider clientId={clientId}>
     <AuthProvider>
-      <React.StrictMode>
-        <RouterProvider router={router} />
-      </React.StrictMode>
+      <OverlayProvider>
+        <React.StrictMode>
+          <RouterProvider router={router} />
+        </React.StrictMode>
+      </OverlayProvider>
     </AuthProvider>
   </GoogleOAuthProvider>
 );
