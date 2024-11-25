@@ -15,3 +15,10 @@
    npm start
    ```
 3. Open localhost:5173
+
+# Files
+
+
+# Tech Stack
+- Frontend: React, TailWindCSS
+- Backend: Node.js
